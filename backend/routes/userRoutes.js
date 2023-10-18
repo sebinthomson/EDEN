@@ -8,6 +8,7 @@ import {
   updateUserImage,
 } from "../controller/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { upload } from "../config/multer.js";
 
 const router = express.Router();
 
@@ -18,6 +19,11 @@ router
   .route("/profile")
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
-router.put("/profile-updateImage", updateUserImage);
+router.put(
+  "/profile-updateImage",
+  upload.single("image"),
+  protect,
+  updateUserImage
+);
 
 export default router;

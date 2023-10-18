@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken.js";
 import User from "../models/userModel.js";
+import { ObjectId } from "mongodb";
 
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -76,6 +77,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
     });
+    res.status(200).json({ message: "User Logged Out" });
   } else {
     res.status(404);
     throw new Error("User not found");
@@ -84,10 +86,15 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 const updateUserImage = asyncHandler(async (req, res) => {
   try {
-    console.log(req.file);
-    res.status(200).json({
-      image: 'image updated'
-    });
+    if (req.file) {
+      User.findByIdAndUpdate(
+        { _id: req.body.id },
+        { profileImage: req.file.filename }
+      ).catch(err=>{
+        console.log(err.message);
+      })
+      res.status(200).json({profileImage: req.file.filename})
+    }
   } catch (error) {
     console.log(error.message);
   }
