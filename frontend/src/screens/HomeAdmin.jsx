@@ -5,10 +5,11 @@ import {
   useSearchUsersMutation,
 } from "../slices/userAdminApiSlice";
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 const HomeAdmin = () => {
   const [listUsersApiCall] = useListUsersMutation();
-  const [searchUser] = useListUsersMutation();
+  const [searchUser] = useSearchUsersMutation();
   const [data, setData] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -20,23 +21,32 @@ const HomeAdmin = () => {
       Toast.error("Error fetching users data");
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log(search, "search");
-  }, [search]);
-
   const handleSearch = async () => {
     const res = await searchUser({ search }).unwrap();
+    setData(res);
+    res.length
+      ? toast.success(`${res.length} matching users found`, {
+          autoClose: 500,
+        })
+      : toast.error("No users found", {
+          autoClose: 500,
+        });
   };
 
   const clearSearch = async () => {
-    fetchData()
+    setSearch("");
+    fetchData();
   };
 
+  const handleDelete = async (userId) => {
+
+    console.log(userId);
+  };
   return (
     <>
       <div
@@ -46,18 +56,24 @@ const HomeAdmin = () => {
           justifyContent: "space-between",
         }}
       >
-        <h1>Users</h1>
+        <div>
+          <h1>Users</h1>
+          <Button
+            style={{ display: "flex", fontSize: "13px" }}
+            onClick={clearSearch}
+          >
+            List All Users
+          </Button>
+        </div>
         <div style={{ display: "flex" }}>
           <input
             type="text"
             placeholder="Search user"
             onChange={(e) => setSearch(e.target.value)}
+            value={search}
           ></input>
           <Button style={{ display: "flex" }} onClick={handleSearch}>
             <FaSearch />
-          </Button>
-          <Button style={{ display: "flex", fontSize:"13px" }} onClick={clearSearch}>
-            Clear Search
           </Button>
         </div>
       </div>
@@ -65,6 +81,7 @@ const HomeAdmin = () => {
         <Table>
           <thead>
             <tr className="text-center">
+              <th>User Id</th>
               <th>Name</th>
               <th>Email</th>
               <th>Image</th>
@@ -72,8 +89,9 @@ const HomeAdmin = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((user, index) => (
+            {data.map((user) => (
               <tr key={user._id} className="text-center">
+                <td>{user._id}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>
@@ -85,8 +103,13 @@ const HomeAdmin = () => {
                 </td>
                 <td>
                   <ButtonGroup size="sm">
-                    <Button>Edit</Button>
-                    <Button variant="danger">Delete</Button>
+                    {/* <Button onClick={()=>handleDelete(user._id)}>Edit</Button> */}
+                    <Button
+                      variant="danger"
+                      onClick={() => handleDelete(user._id)}
+                    >
+                      Delete
+                    </Button>
                   </ButtonGroup>
                 </td>
               </tr>

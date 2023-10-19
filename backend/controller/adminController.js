@@ -18,17 +18,25 @@ const authAdmin = asyncHandler(async (req, res) => {
   }
 });
 
-const adminListUsers = asyncHandler(async(req,res)=>{
+const adminListUsers = asyncHandler(async (req, res) => {
   try {
-    const users = await User.find()
-    console.log(users,'users')
-    res.status(201).json({users})
+    const users = await User.find({ isAdmin: false });
+    res.status(201).json({ users });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
-})
+});
 
-export {
-    authAdmin,
-    adminListUsers
-}
+const adminSearchUsers = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find({
+      name: { $regex: req.body.search, $options: "i" },
+      isAdmin: false,
+    });
+    res.status(200).json(users);
+  } catch (error) {
+    console.log(error.message);
+  }
+});
+
+export { authAdmin, adminListUsers, adminSearchUsers };
