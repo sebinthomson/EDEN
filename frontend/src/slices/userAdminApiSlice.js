@@ -1,7 +1,7 @@
+import { ADMIN_URL, USERS_URL } from "../constants/constants";
 import { apiSlice } from "./apiSlice";
-const USERS_URL = "/api/users";
 
-export const userApiSlice = apiSlice.injectEndpoints({
+export const userAdminApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (data) => ({
@@ -37,6 +37,34 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
+    adminLogin: builder.mutation({
+      query: (data) => ({
+        url: `${ADMIN_URL}/auth`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    listUsers: builder.mutation({
+      query: (data) => ({
+        url: `${ADMIN_URL}/list-users`,
+        method: "GET",
+        body: data,
+      }),
+    }),
+    searchUsers: builder.mutation({
+      query: (data) => ({
+        url: `${ADMIN_URL}/search-users`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    adminLogout: builder.mutation({
+      query: () => ({
+        url: `${USERS_URL}/logout`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -45,5 +73,9 @@ export const {
   useLogoutMutation,
   useRegisterMutation,
   useUpdateUserMutation,
-  useUpdateProfileImageMutation
-} = userApiSlice;
+  useUpdateProfileImageMutation,
+  useAdminLoginMutation,
+  useAdminLogoutMutation,
+  useListUsersMutation,
+  useSearchUsersMutation
+} = userAdminApiSlice;

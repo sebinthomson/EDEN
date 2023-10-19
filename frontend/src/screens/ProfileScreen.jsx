@@ -7,7 +7,7 @@ import Loader from "../components/Loader";
 import {
   useUpdateUserMutation,
   useUpdateProfileImageMutation,
-} from "../slices/usersApiSlice";
+} from "../slices/userAdminApiSlice";
 import { setCredentials } from "../slices/authSlice";
 
 const ProfileScreen = () => {
@@ -66,7 +66,6 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     if (updatedProfileImage && updatedProfileImage != "default.png") {
-      console.log(updatedProfileImage);
       handleChange();
     }
   }, [updatedProfileImage]);

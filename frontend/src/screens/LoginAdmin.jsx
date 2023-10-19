@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import FormContainer from "../components/FormContainer";
-import { useLoginMutation } from "../slices/usersApiSlice";
-import { setCredentials } from "../slices/authSlice";
+import { useAdminLoginMutation } from "../slices/userAdminApiSlice";
+import { setAdminCredentials } from "../slices/adminAuthSlice";
 import { toast } from "react-toastify";
 import Loader from "../components/Loader";
 
@@ -15,17 +15,18 @@ const LoginAdmin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-//   const [login, { isLoading }] = useLoginMutation();
+  const [login, { isLoading }] = useAdminLoginMutation();
 
-  const { userInfo } = useSelector((state) => state.auth);
-console.log(userInfo,'userInfo')
+  const { adminInfo } = useSelector((state) => state.adminAuth);
+  console.log(adminInfo, "adminInfo");
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       const res = await login({ email, password }).unwrap();
-      dispatch(setCredentials({ ...res }));
-      navigate("/");
+      console.log(res,'res in loginadmin');
+      dispatch(setAdminCredentials({ ...res }));
+      navigate("/admin/");
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }

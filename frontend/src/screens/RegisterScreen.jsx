@@ -5,7 +5,7 @@ import Loader from "../components/Loader";
 // import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useRegisterMutation } from "../slices/usersApiSlice";
+import { useRegisterMutation } from "../slices/userAdminApiSlice";
 import { setCredentials } from "../slices/authSlice";
 import { toast } from "react-toastify";
 

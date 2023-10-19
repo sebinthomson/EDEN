@@ -2,16 +2,20 @@ import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { LinkContainer } from "react-router-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { useLogoutMutation } from "../slices/usersApiSlice";
-import {logout} from "../slices/authSlice"
-import {useNavigate} from 'react-router-dom'
+import { useAdminLogoutMutation, useLogoutMutation } from "../slices/userAdminApiSlice";
+import { logout } from "../slices/authSlice";
+import { adminLogout } from "../slices/adminAuthSlice";
+import { useNavigate } from "react-router-dom";
 
-const Header = () => {
+// eslint-disable-next-line react/prop-types
+const Header = ({ admin }) => {
   const { userInfo } = useSelector((state) => state.auth);
+  const { adminInfo } = useSelector((state) => state.adminAuth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [logoutApiCall] = useLogoutMutation();
+  const [adminLogoutApiCall] = useAdminLogoutMutation();
 
   const logoutHandler = async () => {
     try {
@@ -22,17 +26,48 @@ const Header = () => {
       console.error(err);
     }
   };
+  const adminLogoutHandler = async () => {
+    try {
+      await adminLogoutApiCall().unwrap()
+      dispatch(adminLogout())
+      navigate('/admin/login')
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <header>
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
-          <LinkContainer to="/">
-            <Navbar.Brand>MERN App</Navbar.Brand>
-          </LinkContainer>
+          {admin ? (
+            <LinkContainer to="/admin/">
+              <Navbar.Brand>Admin Panel</Navbar.Brand>
+            </LinkContainer>
+          ) : (
+            <LinkContainer to="/">
+              <Navbar.Brand>MERN App</Navbar.Brand>
+            </LinkContainer>
+          )}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              {userInfo ? (
+              {admin ? adminInfo ? (
+                <>
+                  <LinkContainer to="/admin/logout">
+                    <Nav.Link onClick={adminLogoutHandler}>
+                      <FaSignOutAlt /> Logout
+                    </Nav.Link>
+                  </LinkContainer>
+                </>
+              ): (
+                <>
+                  <LinkContainer to="/admin/logout">
+                    <Nav.Link onClick={adminLogoutHandler}>
+                      <FaSignOutAlt /> Login
+                    </Nav.Link>
+                  </LinkContainer>
+                </>
+              ) : userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
                     <LinkContainer to="/profile">

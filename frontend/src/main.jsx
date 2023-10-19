@@ -16,23 +16,28 @@ import RegisterScreen from "./screens/RegisterScreen.jsx";
 import HomeScreen from "./screens/HomeScreen.jsx";
 import ProfileScreen from "./screens/ProfileScreen.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
+import PrivateRouteAdmin from "./components/PrivateRouteAdmin.jsx";
 import LoginAdmin from "./screens/LoginAdmin.jsx";
+import HomeAdmin from "./screens/HomeAdmin.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
-      <Route index={true} path="/" element={<HomeScreen />} />
-      <Route path="/login" element={<LoginScreen />} />
-      <Route path="/register" element={<RegisterScreen />} />
-      <Route path="" element={<PrivateRoute />}>
-        <Route path="/profile" element={<ProfileScreen />} />
+    <>
+      <Route path="/" element={<App admin={false} />}>
+        <Route index={true} path="/" element={<HomeScreen />} />
+        <Route path="/login" element={<LoginScreen />} />
+        <Route path="/register" element={<RegisterScreen />} />
+        <Route path="" element={<PrivateRoute />}>
+          <Route path="/profile" element={<ProfileScreen />} />
+        </Route>
       </Route>
-
-      <Route path="/admin/login" element={<LoginAdmin />} />
-      {/* <Route path="" element={<PrivateRouteAdmin />}>
-        <Route path="/admin/" element={<HomeAdmin />} />
-      </Route> */}
-    </Route>
+      <Route path="/" element={<App admin />}>
+        <Route path="/admin/login" element={<LoginAdmin />} />
+        <Route path="" element={<PrivateRouteAdmin />}>
+          <Route path="/admin/" element={<HomeAdmin />} />
+        </Route>
+      </Route>
+    </>
   )
 );
 
