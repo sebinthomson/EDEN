@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,13 +18,18 @@ const LoginAdmin = () => {
   const [login, { isLoading }] = useAdminLoginMutation();
 
   const { adminInfo } = useSelector((state) => state.adminAuth);
-  console.log(adminInfo, "adminInfo");
+
+  
+  useEffect(() => {
+    if (adminInfo) {
+      navigate("/admin/");
+    }
+  }, [navigate, adminInfo]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       const res = await login({ email, password }).unwrap();
-      console.log(res,'res in loginadmin');
       dispatch(setAdminCredentials({ ...res }));
       navigate("/admin/");
     } catch (err) {

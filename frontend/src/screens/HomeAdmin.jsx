@@ -1,17 +1,32 @@
-import { Toast, Table, Image, Button, ButtonGroup } from "react-bootstrap";
+import {
+  Toast,
+  Table,
+  Image,
+  Button,
+  ButtonGroup,
+  Modal,
+} from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
 import {
   useListUsersMutation,
   useSearchUsersMutation,
+  useDeleteUserMutation,
 } from "../slices/userAdminApiSlice";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const HomeAdmin = () => {
   const [listUsersApiCall] = useListUsersMutation();
   const [searchUser] = useSearchUsersMutation();
+  const [deleteUser] = useDeleteUserMutation();
+
   const [data, setData] = useState(null);
   const [search, setSearch] = useState("");
+  const [show, setShow] = useState(false);
+  const [userIdToDeleteOrEdit, setUserIdToDeleteOrEdit] = useState("");
+
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -24,6 +39,7 @@ const HomeAdmin = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = async () => {
@@ -43,9 +59,27 @@ const HomeAdmin = () => {
     fetchData();
   };
 
-  const handleDelete = async (userId) => {
+  const handleDelete = async () => {
+    const { message, task } = await deleteUser({
+      userId: userIdToDeleteOrEdit,
+    }).unwrap();
+    task ? toast.success(message, { autoClose: 500 }) : toast.error(message);
+    setShow(false);
+    setUserIdToDeleteOrEdit("");
+    fetchData();
+  };
+  const handleClose = () => setShow(false);
+  const handleShow = (userId) => {
+    setShow(true);
+    setUserIdToDeleteOrEdit(userId);
+  };
 
-    console.log(userId);
+  const handleEdit = (user) => {
+    navigate(`/admin/edit-user/${user._id}`);
+  };
+
+  const createUser = () => {
+    navigate("/admin/create-user");
   };
   return (
     <>
@@ -58,12 +92,24 @@ const HomeAdmin = () => {
       >
         <div>
           <h1>Users</h1>
-          <Button
-            style={{ display: "flex", fontSize: "13px" }}
-            onClick={clearSearch}
-          >
-            List All Users
-          </Button>
+          <ButtonGroup size="sm" className="mb-3">
+            <Button
+              style={{
+                display: "flex",
+                fontSize: "13px,",
+              }}
+              onClick={clearSearch}
+            >
+              List All Users
+            </Button>
+            <Button
+              variant="success"
+              style={{ display: "flex", fontSize: "13px" }}
+              onClick={createUser}
+            >
+              New User
+            </Button>
+          </ButtonGroup>
         </div>
         <div style={{ display: "flex" }}>
           <input
@@ -103,13 +149,34 @@ const HomeAdmin = () => {
                 </td>
                 <td>
                   <ButtonGroup size="sm">
-                    {/* <Button onClick={()=>handleDelete(user._id)}>Edit</Button> */}
+                    <Button onClick={() => handleEdit(user)}>Edit</Button>
                     <Button
                       variant="danger"
-                      onClick={() => handleDelete(user._id)}
+                      onClick={() => handleShow(user._id)}
                     >
                       Delete
                     </Button>
+                    <Modal
+                      show={show}
+                      onHide={handleClose}
+                      backdrop="static"
+                      keyboard={false}
+                    >
+                      <Modal.Header closeButton>
+                        <Modal.Title>Delete Confirmation</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        Are you sure you want to delete this User
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                          Close
+                        </Button>
+                        <Button variant="primary" onClick={handleDelete}>
+                          Delete User
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
                   </ButtonGroup>
                 </td>
               </tr>

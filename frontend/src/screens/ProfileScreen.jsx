@@ -22,6 +22,7 @@ const ProfileScreen = () => {
   const { userInfo } = useSelector((state) => state.auth);
 
   const [updateProfile, { isLoading }] = useUpdateUserMutation();
+  // eslint-disable-next-line no-unused-vars
   const [profileImageUpdate, { isUpdating }] = useUpdateProfileImageMutation();
 
   const hiddenFileInput = useRef(null);

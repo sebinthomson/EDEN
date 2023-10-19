@@ -19,6 +19,8 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import PrivateRouteAdmin from "./components/PrivateRouteAdmin.jsx";
 import LoginAdmin from "./screens/LoginAdmin.jsx";
 import HomeAdmin from "./screens/HomeAdmin.jsx";
+import AdminCreateUser from "./screens/AdminCreateUser.jsx";
+import AdminEditUser from "./screens/AdminEditUser.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,6 +35,8 @@ const router = createBrowserRouter(
       </Route>
       <Route path="/" element={<App admin />}>
         <Route path="/admin/login" element={<LoginAdmin />} />
+        <Route path="/admin/create-user" element={<AdminCreateUser />} />
+        <Route path="/admin/edit-user/:user" element={<AdminEditUser />} />
         <Route path="" element={<PrivateRouteAdmin />}>
           <Route path="/admin/" element={<HomeAdmin />} />
         </Route>

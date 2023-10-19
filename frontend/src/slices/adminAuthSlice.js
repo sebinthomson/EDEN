@@ -11,7 +11,6 @@ const adminAuthSlice = createSlice({
   initialState,
   reducers: {
     setAdminCredentials: (state, action) => {
-      console.log(action.payload,'setAdminCredentials')
       state.adminInfo = action.payload;
       localStorage.setItem('adminInfo', JSON.stringify(action.payload));
     },
