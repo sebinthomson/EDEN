@@ -7,7 +7,7 @@ import Loader from "../components/Loader";
 import {
   useUpdateUserMutation,
   useUpdateProfileImageMutation,
-} from "../slices/usersApiSlice";
+} from "../slices/userAdminApiSlice";
 import { setCredentials } from "../slices/authSlice";
 
 const ProfileScreen = () => {
@@ -15,13 +15,14 @@ const ProfileScreen = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [profileImage, setProfileImage] = useState("");
+  const [updatedProfileImage, setUpdatedProfileImage] = useState();
 
   const dispatch = useDispatch();
 
   const { userInfo } = useSelector((state) => state.auth);
 
   const [updateProfile, { isLoading }] = useUpdateUserMutation();
+  // eslint-disable-next-line no-unused-vars
   const [profileImageUpdate, { isUpdating }] = useUpdateProfileImageMutation();
 
   const hiddenFileInput = useRef(null);
@@ -29,7 +30,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     setName(userInfo.name);
     setEmail(userInfo.email);
-    setProfileImage(userInfo.profileImage)
+    setUpdatedProfileImage(userInfo.profileImage)
   }, [userInfo.email, userInfo.name, userInfo.profileImage]);
 
   const submitHandler = async (e) => {
@@ -55,14 +56,21 @@ const ProfileScreen = () => {
   const handleClick = () => {
     hiddenFileInput.current.click();
   };
-  const handleChange = async (event) => {
-    const image = event.target.files[0];
-    const res = await profileImageUpdate({
-      _id: userInfo._id,
-      image,
-    });
-    console.log("response", res);
+
+  const handleChange = async () => {
+    const formData = new FormData();
+    formData.append("image", updatedProfileImage);
+    formData.append("id", userInfo._id);
+    const res = await profileImageUpdate(formData).unwrap();
+    setUpdatedProfileImage(res.profileImage)
   };
+
+  useEffect(() => {
+    if (updatedProfileImage && updatedProfileImage != "default.png") {
+      handleChange();
+    }
+  }, [updatedProfileImage]);
+
   return (
     <FormContainer>
       <div
@@ -82,7 +90,7 @@ const ProfileScreen = () => {
           }}
         >
           <Image
-            src={`../public/Images/${userInfo.profileImage}`}
+            src={`../public/Images/${updatedProfileImage}`}
             roundedCircle
             style={{ height: "100px", paddingBottom: "10px" }}
           />
@@ -92,10 +100,14 @@ const ProfileScreen = () => {
             </Button>
             <input
               type="file"
-              onChange={handleChange}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                setUpdatedProfileImage(file);
+              }}
               ref={hiddenFileInput}
               style={{ display: "none" }}
-            />
+              name="image"
+            ></input>
           </ButtonGroup>
         </div>
       </div>
@@ -139,7 +151,7 @@ const ProfileScreen = () => {
         </Form.Group>
 
         <Button type="submit" variant="primary" className="mt-3">
-          Update
+          Save Changes
         </Button>
 
         {isLoading && <Loader />}

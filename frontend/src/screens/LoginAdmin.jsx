@@ -1,44 +1,44 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Form, Button, Row, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { Form, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import FormContainer from "../components/FormContainer";
-import { useLoginMutation } from "../slices/userAdminApiSlice";
-import { setCredentials } from "../slices/authSlice";
+import { useAdminLoginMutation } from "../slices/userAdminApiSlice";
+import { setAdminCredentials } from "../slices/adminAuthSlice";
 import { toast } from "react-toastify";
 import Loader from "../components/Loader";
 
-const LoginScreen = () => {
+const LoginAdmin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [login, { isLoading }] = useLoginMutation();
+  const [login, { isLoading }] = useAdminLoginMutation();
 
+  const { adminInfo } = useSelector((state) => state.adminAuth);
 
-  const { userInfo } = useSelector((state) => state.auth);
-
+  
   useEffect(() => {
-    if (userInfo) {
-      navigate("/");
+    if (adminInfo) {
+      navigate("/admin/");
     }
-  }, [navigate, userInfo]);
+  }, [navigate, adminInfo]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       const res = await login({ email, password }).unwrap();
-      dispatch(setCredentials({ ...res }));
-      navigate("/");
+      dispatch(setAdminCredentials({ ...res }));
+      navigate("/admin/");
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }
   };
   return (
     <FormContainer>
-      <h1>Sign In</h1>
+      <h1>Admin Login</h1>
       <Form onSubmit={submitHandler}>
         <Form.Group className="my-2" controlId="email">
           <Form.Label>Email Address</Form.Label>
@@ -62,17 +62,11 @@ const LoginScreen = () => {
         {isLoading && <Loader />}
 
         <Button type="submit" variant="primary" className="mt-3">
-          Sign In
+          Login
         </Button>
-
-        <Row className="py-3">
-          <Col>
-            New Custmer? <Link to="/register">Register</Link>
-          </Col>
-        </Row>
       </Form>
     </FormContainer>
   );
 };
 
-export default LoginScreen;
+export default LoginAdmin;

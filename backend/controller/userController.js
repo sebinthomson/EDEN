@@ -84,10 +84,15 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 const updateUserImage = asyncHandler(async (req, res) => {
   try {
-    console.log(req.file);
-    res.status(200).json({
-      image: 'image updated'
-    });
+    if (req.file) {
+      User.findByIdAndUpdate(
+        { _id: req.body.id },
+        { profileImage: req.file.filename }
+      ).catch(err=>{
+        console.log(err.message);
+      })
+      res.status(200).json({profileImage: req.file.filename})
+    }
   } catch (error) {
     console.log(error.message);
   }
