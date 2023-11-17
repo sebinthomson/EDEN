@@ -1,18 +1,13 @@
 import { Outlet } from "react-router-dom";
-import { Container } from "react-bootstrap";
-import Header from "./components/Header.jsx";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Navbar from "./components/User/Navbar";
 
 // eslint-disable-next-line react/prop-types, no-unused-vars
-function App({ admin }) {
+function App() {
   return (
     <>
-      {admin ? <Header admin /> : <Header admin={false} />}
-      <ToastContainer />
-      <Container className="my-2">
-        <Outlet />
-      </Container>
+      <Navbar />
+      <Outlet />
     </>
   );
 }
