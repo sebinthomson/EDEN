@@ -3,47 +3,43 @@ import { apiSlice } from "./apiSlice";
 
 export const userAdminApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation({
+    sendVerifyMail: builder.mutation({
       query: (data) => ({
-        url: `${USERS_URL}/auth`,
+        url: `${USERS_URL}/sendVerifyMail`,
         method: "POST",
         body: data,
       }),
     }),
-    logout: builder.mutation({
-      query: () => ({
-        url: `${USERS_URL}/logout`,
-        method: "POST",
-      }),
-    }),
-    register: builder.mutation({
+    registerUser: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/registerUser`,
         method: "POST",
         body: data,
       }),
     }),
-    updateUser: builder.mutation({
+    loginUser: builder.mutation({
       query: (data) => ({
-        url: `${USERS_URL}/profile`,
-        method: "PUT",
+        url: `${USERS_URL}/loginUser`,
+        method: "POST",
         body: data,
       }),
     }),
-    updateProfileImage: builder.mutation({
+    oAuthLoginUser: builder.mutation({
       query: (data) => ({
-        url: `${USERS_URL}/profile-updateImage`,
-        method: "PUT",
+        url: `${USERS_URL}/oAuthLoginUser`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    logoutUser: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/logoutUser`,
+        method: "POST",
         body: data,
       }),
     }),
   }),
 });
 
-export const {
-  useLoginMutation,
-  useLogoutMutation,
-  useRegisterMutation,
-  useUpdateUserMutation,
-  useUpdateProfileImageMutation,
-} = userAdminApiSlice;
+export const { useSendVerifyMailMutation, useRegisterUserMutation, useLoginUserMutation, useOAuthLoginUserMutation, useLogoutUserMutation } =
+  userAdminApiSlice;

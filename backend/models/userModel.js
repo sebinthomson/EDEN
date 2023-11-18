@@ -14,11 +14,18 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
     },
-    profileImage: {
-      type: String,
-      default: "default.png",
+    oAuthLogin: {
+      type: Boolean,
+      default: false
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false
+    },
+    auctioneer: {
+      type: Boolean,
+      default: false
     },
     isAdmin: {
       type: Boolean,

@@ -17,24 +17,86 @@ import {
   Text,
   useDisclosure,
   useMergeRefs,
+  useToast,
 } from "@chakra-ui/react";
 import { useRef } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
-import Logo from "../components/User/Logo";
+import Logo from "../../components/Logo";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  useLoginUserMutation,
+  useOAuthLoginUserMutation,
+} from "../../slices/userApiSlice";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../slices/userAuthSlice";
 
 const UserLogin = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { isOpen, onToggle } = useDisclosure();
   const inputRef = useRef(null);
+  const dispatch = useDispatch();
   const mergeRef = useMergeRefs(inputRef);
+  const toast = useToast();
+  const [loginUserApi, { isLoadingLoginUserApi }] = useLoginUserMutation();
+  const [oAuthLoginUserApi, { isLoadingOAuthLoginUserApi }] =
+    useOAuthLoginUserMutation();
   const onClickReveal = () => {
     onToggle();
     if (inputRef.current) {
       inputRef.current.focus({
         preventScroll: true,
+      });
+    }
+  };
+  const handleSignIn = async () => {
+    if (!email && !password) {
+      toast({
+        title: "Empty fields, Please enter values",
+        status: `error`,
+        duration: 9000,
+        isClosable: true,
+      });
+    } else {
+      try {
+        const res = await loginUserApi({ email, password }).unwrap();
+        console.log(res);
+        if (res.user) {
+          dispatch(setCredentials({ ...res }));
+          navigate("/");
+        }
+      } catch (err) {
+        toast({
+          title: `${err?.data?.message || err.error}`,
+          status: `error`,
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    }
+  };
+  const handleOAuth = async (credentials) => {
+    try {
+      const res = await oAuthLoginUserApi({
+        name: credentials.given_name + credentials.family_name,
+        email: credentials.email,
+        oAuthLogin: true,
+      });
+      console.log("res:", res);
+      if (res.data.user) {
+        dispatch(setCredentials({ ...res.data }));
+        navigate("/");
+      }
+    } catch (err) {
+      toast({
+        title: `${err?.data?.message || err.error}`,
+        status: `error`,
+        duration: 9000,
+        isClosable: true,
       });
     }
   };
@@ -52,7 +114,7 @@ const UserLogin = () => {
         }}
       >
         <Stack spacing="4">
-          <Stack spacing="3">
+          <Stack spacing="3" alignItems="center">
             <Logo />
             <Stack
               spacing={{
@@ -112,7 +174,12 @@ const UserLogin = () => {
               <Stack spacing="2">
                 <FormControl>
                   <FormLabel htmlFor="email">Email</FormLabel>
-                  <Input id="email" type="email" />
+                  <Input
+                    id="email"
+                    type="email"
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </FormControl>
                 <FormControl>
                   <FormLabel htmlFor="password">Password</FormLabel>
@@ -134,17 +201,18 @@ const UserLogin = () => {
                       type={isOpen ? "text" : "password"}
                       autoComplete="current-password"
                       required
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </InputGroup>
                 </FormControl>
               </Stack>
-              <HStack justify="space-between">
+              {/* <HStack justify="space-between">
                 <Button variant="text" size="sm">
                   Forgot password?
                 </Button>
-              </HStack>
+              </HStack> */}
               <Stack spacing="2">
-                <Button>Sign in</Button>
+                <Button onClick={handleSignIn}>Sign in</Button>
                 <HStack>
                   <Divider />
                   <Text textStyle="sm" whiteSpace="nowrap" color="fg.muted">
@@ -159,7 +227,7 @@ const UserLogin = () => {
                         const decoded = jwtDecode(
                           credentialResponse.credential
                         );
-                        console.log(decoded);
+                        handleOAuth(decoded);
                       }}
                       onError={() => {
                         console.log("Login Failed");

@@ -1,12 +1,11 @@
 import { Outlet } from "react-router-dom";
-import "react-toastify/dist/ReactToastify.css";
 import Navbar from "./components/User/Navbar";
 
 // eslint-disable-next-line react/prop-types, no-unused-vars
-function App() {
+function App({ user }) {
   return (
     <>
-      <Navbar />
+      {user && <Navbar />}
       <Outlet />
     </>
   );

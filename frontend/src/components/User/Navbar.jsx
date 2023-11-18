@@ -1,4 +1,4 @@
-import Logo from "./Logo";
+import Logo from "../Logo.jsx";
 import {
   Box,
   Flex,
@@ -12,20 +12,51 @@ import {
   useColorModeValue,
   useBreakpointValue,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../slices/userAuthSlice";
+import { useLogoutUserMutation } from "../../slices/userApiSlice.js";
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
   const navigate = useNavigate();
-
+  const { userInfo } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const toast = useToast();
+  const [logoutUserApi, { isLoadingLogoutUserApi }] = useLogoutUserMutation();
+  const handleLogout = async () => {
+    try {
+      const res = await logoutUserApi({}).unwrap();
+      if (res.logout) {
+        dispatch(logout());
+        toast({
+          title: `${res.message}`,
+          status: `success`,
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    } catch (err) {
+      toast({
+        title: `${err?.data?.message || err.error}`,
+        status: `error`,
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  };
+  const handleLogin = () => {
+    navigate("/userLogin");
+  };
   return (
     <Box
       bg={useColorModeValue("white", "gray.800")}
       color={useColorModeValue("gray.600", "white")}
       minH="50px"
-      pt={{ base: 7 }}
+      py={{ base: 2 }}
       px={{ base: 50 }}
       borderBottom={2}
       borderStyle="solid"
@@ -36,6 +67,7 @@ const Navbar = () => {
         ml={{ base: -2 }}
         display={{ base: "flex", md: "none" }}
         justifyContent={{ base: "space-between" }}
+        alignItems={{ base: "center" }}
       >
         <IconButton
           onClick={onToggle}
@@ -50,6 +82,7 @@ const Navbar = () => {
           textAlign={useBreakpointValue({ base: "center", md: "left" })}
           fontFamily="heading"
           color={useColorModeValue("gray.800", "white")}
+          mt="-10px"
         >
           <Logo />
         </Text>
@@ -71,23 +104,43 @@ const Navbar = () => {
           <DesktopNav />
         </Flex>
         <Stack flex={{ base: 1, md: 1 }} justify="flex-end" direction="row">
-          <Button
-            size="sm"
-            as="a"
-            display={{ base: "none", md: "inline-flex" }}
-            fontSize="sm"
-            fontWeight={600}
-            color="white"
-            bg="teal.400"
-            onClick={() => navigate("/userLogin")}
-            _hover={{ bg: "blue.700" }}
-          >
-            Login
-          </Button>
+          {userInfo ? (
+            <Button
+              size="sm"
+              as="a"
+              display={{ base: "none", md: "inline-flex" }}
+              fontSize="sm"
+              fontWeight={600}
+              color="white"
+              bg="teal.400"
+              onClick={handleLogout}
+              _hover={{ bg: "blue.700" }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              as="a"
+              display={{ base: "none", md: "inline-flex" }}
+              fontSize="sm"
+              fontWeight={600}
+              color="white"
+              bg="teal.400"
+              onClick={handleLogin}
+              _hover={{ bg: "blue.700" }}
+            >
+              Login
+            </Button>
+          )}
         </Stack>
       </Flex>
       <Collapse in={isOpen} animateOpacity>
-        <MobileNav />
+        <MobileNav
+          handleLogout={handleLogout}
+          user={userInfo}
+          handleLogin={handleLogin}
+        />
       </Collapse>
     </Box>
   );
@@ -126,7 +179,7 @@ const DesktopNav = () => {
   );
 };
 
-const MobileNav = () => (
+const MobileNav = ({ handleLogout, user, handleLogin }) => (
   <Stack
     bg={useColorModeValue("white", "gray.800")}
     p={4}
@@ -135,6 +188,41 @@ const MobileNav = () => (
     {NAV_ITEMS.map((navItem) => (
       <MobileNavItem key={navItem.label} {...navItem} />
     ))}
+    <Stack spacing={4}>
+      {user ? (
+        <Box
+          py={2}
+          as="button"
+          onClick={handleLogout}
+          justifyContent="space-between"
+          alignItems="center"
+          _hover={{ textDecoration: "none" }}
+        >
+          <Text
+            fontWeight={600}
+            color={useColorModeValue("gray.600", "gray.200")}
+          >
+            Logout
+          </Text>
+        </Box>
+      ) : (
+        <Box
+          py={2}
+          as="button"
+          onClick={handleLogin}
+          justifyContent="space-between"
+          alignItems="center"
+          _hover={{ textDecoration: "none" }}
+        >
+          <Text
+            fontWeight={600}
+            color={useColorModeValue("gray.600", "gray.200")}
+          >
+            Login
+          </Text>
+        </Box>
+      )}
+    </Stack>
   </Stack>
 );
 
@@ -165,7 +253,7 @@ const MobileNavItem = ({ label, href }) => {
 const NAV_ITEMS = [
   {
     label: "Home",
-    href: "/userHome",
+    href: "/",
   },
   {
     label: "Auctions",

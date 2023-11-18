@@ -18,7 +18,7 @@ const authAdmin = asyncHandler(async (req, res) => {
   }
 });
 
-const adminListUsers = asyncHandler(async (req, res) => {
+const listUsers = asyncHandler(async (req, res) => {
   try {
     const users = await User.find({ isAdmin: false });
     res.status(201).json({ users });
@@ -56,39 +56,39 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
 const adminEditUser = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.body._id);
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    const updatedUser = await user.save();
-    res.status(200).json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-    });
-  } else {
-    res.status(404);
-    throw new Error("User not found");
-  }
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      const updatedUser = await user.save();
+      res.status(200).json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
+    }
     res.status(200).json({ message: "hello world" });
   } catch (error) {
     console.log(error.message);
   }
 });
 
-const adminGetUser = asyncHandler(async(req,res)=>{
+const adminGetUser = asyncHandler(async (req, res) => {
   try {
-    const user = await User.find({_id: req.body.user})
-    res.status(200).json({user})
+    const user = await User.find({ _id: req.body.user });
+    res.status(200).json({ user });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
-})
+});
 
 export {
+  listUsers,
   authAdmin,
-  adminListUsers,
   adminSearchUsers,
   adminDeleteUser,
   adminEditUser,
-  adminGetUser
+  adminGetUser,
 };

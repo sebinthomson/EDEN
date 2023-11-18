@@ -1,18 +1,51 @@
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken.js";
 import User from "../models/userModel.js";
+import {
+  sendVerificationMailHelper,
+  registerUserHelper,
+} from "../helper/userHelper.js";
+import Randomstring from "randomstring";
+import session from "express-session";
 
-const authUser = asyncHandler(async (req, res) => {
+const sendVerifyMail = asyncHandler(async (req, res) => {
+  const { name, email } = req.body;
+  const existEmail = await User.findOne({ email: email });
+  if (existEmail) {
+    return res.status(400).json({ error: "Email already exists." });
+  }
+
+  const otp = Randomstring.generate({ length: 4, charset: "numeric" });
+  console.log("Generated OTP", otp);
+
+  req.session = req.session || {};
+  req.session.tempOtp = otp;
+
+  sendVerificationMailHelper(name, email, otp);
+  return res.status(200).json({ otpSend: true });
+});
+
+const registerUser = asyncHandler(async (req, res) => {
+  const { name, email, password, otpPin } = req.body;
+  const actualOTP = req.session.tempOtp;
+  if (actualOTP === otpPin) {
+    const user = await registerUserHelper(name, email, password);
+    console.log(user);
+    res.status(201).json({ user: user });
+  } else {
+    res.status(401);
+    throw new Error("Error while creating user");
+  }
+});
+
+const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email: email });
 
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user._id);
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      profileImage: user.profileImage,
+      user: user,
     });
   } else {
     res.status(401);
@@ -20,29 +53,21 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
-  const userExist = await User.findOne({ email: email });
-  if (userExist) {
-    res.status(400);
-    throw new Error("User already exist");
-  }
-  const user = await User.create({
-    name,
-    email,
-    password,
-  });
+const oAuthLoginUser = asyncHandler(async (req, res) => {
+  const { name, email, oAuthLogin } = req.body;
+  const user = await User.findOne({ email: email });
 
   if (user) {
     generateToken(res, user._id);
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
+      user: user,
     });
-  } else {
-    res.status(400);
-    throw new Error("Invalid user data");
+  } else if (!user) {
+    const user = await registerUserHelper(name, email, oAuthLogin);
+    generateToken(res, user._id);
+    res.status(201).json({
+      user: user,
+    });
   }
 });
 
@@ -51,7 +76,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     expires: new Date(0),
   });
-  res.status(200).json({ message: "User Logged Out" });
+  res.status(200).json({ message: "User Logged Out", logout: true });
 });
 
 const getUserProfile = asyncHandler(async (req, res) => {
@@ -87,10 +112,10 @@ const updateUserImage = asyncHandler(async (req, res) => {
       User.findByIdAndUpdate(
         { _id: req.body.id },
         { profileImage: req.file.filename }
-      ).catch(err=>{
+      ).catch((err) => {
         console.log(err.message);
-      })
-      res.status(200).json({profileImage: req.file.filename})
+      });
+      res.status(200).json({ profileImage: req.file.filename });
     }
   } catch (error) {
     console.log(error.message);
@@ -98,8 +123,10 @@ const updateUserImage = asyncHandler(async (req, res) => {
 });
 
 export {
-  authUser,
+  sendVerifyMail,
   registerUser,
+  loginUser,
+  oAuthLoginUser,
   logoutUser,
   getUserProfile,
   updateUserProfile,
