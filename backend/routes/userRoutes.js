@@ -5,7 +5,7 @@ import {
   loginUser,
   oAuthLoginUser,
   logoutUser,
-  getUserProfile,
+  newAuctionUser,
   updateUserProfile,
   updateUserImage,
 } from "../controller/userController.js";
@@ -19,12 +19,9 @@ router.post("/registerUser", registerUser);
 router.post("/loginUser", loginUser);
 router.post("/oAuthLoginUser", oAuthLoginUser);
 router.post("/logoutUser", logoutUser);
+router.post("/newAuctionUser", upload.array("images", 3), newAuctionUser);
 
-
-router
-  .route("/profile")
-  .get(protect, getUserProfile)
-  .put(protect, updateUserProfile);
+router.route("/profile").put(protect, updateUserProfile);
 router.put(
   "/profile-updateImage",
   upload.single("image"),

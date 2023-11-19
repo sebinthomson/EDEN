@@ -1,12 +1,14 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./components/User/Navbar";
+import Footer from "./components/User/Footer";
 
 // eslint-disable-next-line react/prop-types, no-unused-vars
-function App({ user }) {
+function App() {
   return (
     <>
-      {user && <Navbar />}
+      <Navbar />
       <Outlet />
+      <Footer />
     </>
   );
 }

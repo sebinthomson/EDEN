@@ -106,7 +106,6 @@ const UserRegister = () => {
         email: credentials.email,
         oAuthLogin: true,
       });
-      console.log(res);
       if (res.data.user) {
         dispatch(setCredentials({ ...res.data }));
         navigate("/");

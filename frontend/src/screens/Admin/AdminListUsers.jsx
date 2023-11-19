@@ -32,7 +32,10 @@ import {
 
 import BreadCrumbs from "../../components/Admin/BreadCrumbs";
 import { useState, useEffect, useRef } from "react";
-import { useListUsersMutation } from "../../slices/adminApiSlice";
+import {
+  useListUsersMutation,
+  useBlockUnblockUserMutation,
+} from "../../slices/adminApiSlice";
 
 const AdminListUsers = () => {
   const [users, setUsers] = useState([]);
@@ -40,6 +43,7 @@ const AdminListUsers = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef(null);
   const [listUsersApiCall] = useListUsersMutation();
+  const [blockUnblockUserApiCall] = useBlockUnblockUserMutation();
   const toast = useToast();
   const fetchData = async () => {
     try {
@@ -57,6 +61,25 @@ const AdminListUsers = () => {
   useEffect(() => {
     fetchData();
   }, []);
+  const userAction = async ({ block, userId }) => {
+    try {
+      const res = await blockUnblockUserApiCall({ userId, block }).unwrap();
+      toast({
+        title: `${res.message}`,
+        status: res.task ? "success" : "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      fetchData();
+    } catch (err) {
+      toast({
+        title: `${err?.data?.message || err.error}`,
+        status: `error`,
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  };
   return (
     <>
       <Box p={2}>
@@ -104,11 +127,21 @@ const AdminListUsers = () => {
                           User Details
                         </MenuItem>
                         {user.isBlocked ? (
-                          <MenuItem icon={<NotAllowedIcon />}>
+                          <MenuItem
+                            icon={<NotAllowedIcon />}
+                            onClick={() =>
+                              userAction({ block: false, userId: user._id })
+                            }
+                          >
                             UnBlock {user.name}
                           </MenuItem>
                         ) : (
-                          <MenuItem icon={<NotAllowedIcon />}>
+                          <MenuItem
+                            icon={<NotAllowedIcon />}
+                            onClick={() =>
+                              userAction({ block: true, userId: user._id })
+                            }
+                          >
                             Block {user.name}
                           </MenuItem>
                         )}

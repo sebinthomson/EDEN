@@ -38,8 +38,15 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    newAuctionUser: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/newAuctionUser`,
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useSendVerifyMailMutation, useRegisterUserMutation, useLoginUserMutation, useOAuthLoginUserMutation, useLogoutUserMutation } =
+export const { useSendVerifyMailMutation, useRegisterUserMutation, useLoginUserMutation, useOAuthLoginUserMutation, useLogoutUserMutation, useNewAuctionUserMutation } =
   userAdminApiSlice;

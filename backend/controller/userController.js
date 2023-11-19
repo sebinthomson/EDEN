@@ -5,8 +5,8 @@ import {
   sendVerificationMailHelper,
   registerUserHelper,
 } from "../helper/userHelper.js";
+import { newEnglishAuction } from "../helper/auctionHelper.js";
 import Randomstring from "randomstring";
-import session from "express-session";
 
 const sendVerifyMail = asyncHandler(async (req, res) => {
   const { name, email } = req.body;
@@ -79,13 +79,43 @@ const logoutUser = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "User Logged Out", logout: true });
 });
 
-const getUserProfile = asyncHandler(async (req, res) => {
-  const user = {
-    _id: req.user._id,
-    name: req.user.name,
-    email: req.user.email,
-  };
-  res.status(200).json(user);
+const newAuctionUser = asyncHandler(async (req, res) => {
+  const {
+    user,
+    item,
+    quantity,
+    startingBid,
+    startsOn,
+    endsOn,
+    englishAuction,
+  } = req.body;
+  console.log(
+    "hello",
+    user,
+    item,
+    quantity,
+    startingBid,
+    startsOn,
+    endsOn,
+    englishAuction,
+    "hello"
+  );
+  const image = [];
+  for (let obj of req.files) {
+    image.push(obj.filename);
+  }
+  if (req.body.englishAuction) {
+    const auction = await newEnglishAuction(
+      user,
+      item,
+      quantity,
+      startingBid,
+      startsOn,
+      endsOn,
+      image
+    );
+    res.status(200).json({ newEnglishAuction: auction });
+  }
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
@@ -128,7 +158,7 @@ export {
   loginUser,
   oAuthLoginUser,
   logoutUser,
-  getUserProfile,
+  newAuctionUser,
   updateUserProfile,
   updateUserImage,
 };

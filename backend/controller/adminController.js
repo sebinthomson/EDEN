@@ -1,16 +1,13 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 
-const authAdmin = asyncHandler(async (req, res) => {
+const loginAdmin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ email: email, isAdmin: true });
 
   if (user && (await user.matchPassword(password))) {
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      profileImage: user.profileImage,
+      admin: user,
     });
   } else {
     res.status(401);
@@ -24,6 +21,22 @@ const listUsers = asyncHandler(async (req, res) => {
     res.status(201).json({ users });
   } catch (error) {
     console.log(error.message);
+  }
+});
+
+const blockUnblockUser = asyncHandler(async (req, res) => {
+  try {
+    await User.updateOne(
+      { _id: req.body.userId },
+      { isBlocked: req.body.block }
+    );
+    res
+      .status(200)
+      .json({ message: "User Profile Blocked Successfully", task: true });
+  } catch (error) {
+    res
+      .status(200)
+      .json({ message: "User Profile Blocking Failed", task: false });
   }
 });
 
@@ -85,8 +98,9 @@ const adminGetUser = asyncHandler(async (req, res) => {
 });
 
 export {
+  loginAdmin,
   listUsers,
-  authAdmin,
+  blockUnblockUser,
   adminSearchUsers,
   adminDeleteUser,
   adminEditUser,

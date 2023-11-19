@@ -8,13 +8,8 @@ import {
   Box,
   Button,
   Container,
-  Divider,
-  Flex,
   Heading,
-  HStack,
-  Link,
   Stack,
-  Text,
   useDisclosure,
   useMergeRefs,
   useToast,
@@ -22,16 +17,11 @@ import {
 import { useRef } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import Logo from "../../components/Logo";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import {
-  useLoginUserMutation,
-  useOAuthLoginUserMutation,
-} from "../../slices/userApiSlice";
+import { useLoginAdminMutation } from "../../slices/adminApiSlice";
 import { useDispatch } from "react-redux";
-import { setCredentials } from "../../slices/userAuthSlice";
+import { setAdminCredentials } from "../../slices/adminAuthSlice";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -42,9 +32,7 @@ const AdminLogin = () => {
   const dispatch = useDispatch();
   const mergeRef = useMergeRefs(inputRef);
   const toast = useToast();
-  const [loginUserApi, { isLoadingLoginUserApi }] = useLoginUserMutation();
-  const [oAuthLoginUserApi, { isLoadingOAuthLoginUserApi }] =
-    useOAuthLoginUserMutation();
+  const [loginAdminApi] = useLoginAdminMutation();
   const onClickReveal = () => {
     onToggle();
     if (inputRef.current) {
@@ -53,7 +41,7 @@ const AdminLogin = () => {
       });
     }
   };
-  const handleSignIn = async () => {
+  const handleLogin = async () => {
     if (!email && !password) {
       toast({
         title: "Empty fields, Please enter values",
@@ -63,11 +51,10 @@ const AdminLogin = () => {
       });
     } else {
       try {
-        const res = await loginUserApi({ email, password }).unwrap();
-        console.log(res);
-        if (res.user) {
-          dispatch(setCredentials({ ...res }));
-          navigate("/");
+        const res = await loginAdminApi({ email, password }).unwrap();
+        if (res.admin) {
+          dispatch(setAdminCredentials({ ...res }));
+          navigate("/admin/listUsers");
         }
       } catch (err) {
         toast({
@@ -77,27 +64,6 @@ const AdminLogin = () => {
           isClosable: true,
         });
       }
-    }
-  };
-  const handleOAuth = async (credentials) => {
-    try {
-      const res = await oAuthLoginUserApi({
-        name: credentials.given_name + credentials.family_name,
-        email: credentials.email,
-        oAuthLogin: true,
-      });
-      console.log("res:", res);
-      if (res.data.user) {
-        dispatch(setCredentials({ ...res.data }));
-        navigate("/");
-      }
-    } catch (err) {
-      toast({
-        title: `${err?.data?.message || err.error}`,
-        status: `error`,
-        duration: 9000,
-        isClosable: true,
-      });
     }
   };
   return (
@@ -179,7 +145,7 @@ const AdminLogin = () => {
                   />
                 </InputGroup>
               </FormControl>
-              <Button onClick={handleSignIn}>Login</Button>
+              <Button onClick={handleLogin}>Login</Button>
             </Stack>
           </Box>
         </Stack>
