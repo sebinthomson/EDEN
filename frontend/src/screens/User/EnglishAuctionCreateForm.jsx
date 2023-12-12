@@ -10,10 +10,10 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FiArrowRight } from "react-icons/fi";
-import { useNewAuctionUserMutation } from "../../slices/userApiSlice";
+import { useNewEnglishAuctionUserMutation } from "../../slices/userApiSlice.js";
 import { useSelector } from "react-redux";
-
-const AuctionCreateForm = () => {
+import { useNavigate } from "react-router-dom";
+const EnglishAuctionCreateForm = () => {
   const [item, setItem] = useState();
   const [quantity, setQuantity] = useState();
   const [startingBid, setStartingBid] = useState();
@@ -22,7 +22,8 @@ const AuctionCreateForm = () => {
   const [images, setImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const toast = useToast();
-  const [newAuctionApiCall] = useNewAuctionUserMutation();
+  const navigate = useNavigate();
+  const [newEnglishAuctionApiCall] = useNewEnglishAuctionUserMutation();
   const { userInfo } = useSelector((state) => state.auth);
   const handleImageChange = (e) => {
     const newImages = Array.from(e.target.files).filter(
@@ -44,20 +45,19 @@ const AuctionCreateForm = () => {
     ) {
       try {
         const formData = new FormData();
-        formData.append("user", userInfo.user._id);
+        formData.append("user", userInfo._id);
         formData.append("item", item);
         formData.append("quantity", quantity);
         formData.append("startingBid", startingBid);
         formData.append("startsOn", startDate);
         formData.append("endsOn", endDate);
-
         for (let obj of images) {
           formData.append("images", obj);
         }
-        formData.append("englishAuction", true);
-
-        const res = await newAuctionApiCall(formData).unwrap();
-        console.log(res, "response");
+        const res = await newEnglishAuctionApiCall(formData).unwrap();
+        navigate("/userEnglishAuctions/details", {
+          state: { data: res.newEnglishAuction },
+        });
       } catch (err) {
         toast({
           title: `${err?.data?.message || err.error}`,
@@ -75,6 +75,7 @@ const AuctionCreateForm = () => {
       });
     }
   };
+
   return (
     <Box display={"flex"} flexDirection={"column"}>
       <Box display={"flex"} flexDirection={{ md: "row", base: "column" }}>
@@ -185,4 +186,4 @@ const AuctionCreateForm = () => {
   );
 };
 
-export default AuctionCreateForm;
+export default EnglishAuctionCreateForm;

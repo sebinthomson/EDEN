@@ -10,6 +10,27 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    forgotPasswordOTP: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/forgotPasswordOTP`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    confirmForgotPasswordOTP: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/confirmForgotPasswordOTP`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    changePasswordUser: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/changePasswordUser`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
     registerUser: builder.mutation({
       query: (data) => ({
         url: `${USERS_URL}/registerUser`,
@@ -38,9 +59,35 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    newAuctionUser: builder.mutation({
+    newEnglishAuctionUser: builder.mutation({
       query: (data) => ({
-        url: `${USERS_URL}/newAuctionUser`,
+        url: `${USERS_URL}/newEnglishAuctionUser`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    newReverseAuctionUser: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/newReverseAuctionUser`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    listAuctionUser: builder.query({
+      query: () => ({
+        url: `${USERS_URL}/listAuctionUser`,
+        method: "GET",
+      }),
+    }),
+    loadAuctioneerProfile: builder.query({
+      query: (data) => ({
+        url: `${USERS_URL}/loadAuctioneerProfile?userId=${data.userId}`,
+        method: "GET",
+      }),
+    }),
+    profileUpdate: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/profileUpdate`,
         method: "POST",
         body: data,
       }),
@@ -48,5 +95,18 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useSendVerifyMailMutation, useRegisterUserMutation, useLoginUserMutation, useOAuthLoginUserMutation, useLogoutUserMutation, useNewAuctionUserMutation } =
-  userAdminApiSlice;
+export const {
+  useSendVerifyMailMutation,
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useForgotPasswordOTPMutation,
+  useConfirmForgotPasswordOTPMutation,
+  useChangePasswordUserMutation,
+  useOAuthLoginUserMutation,
+  useLogoutUserMutation,
+  useNewEnglishAuctionUserMutation,
+  useNewReverseAuctionUserMutation,
+  useListAuctionUserQuery,
+  useLoadAuctioneerProfileQuery,
+  useProfileUpdateMutation
+} = userAdminApiSlice;

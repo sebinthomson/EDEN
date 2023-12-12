@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   Box,
   Flex,
@@ -6,20 +7,64 @@ import {
   Stack,
   Text,
   Button,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux/es/hooks/useSelector";
 
 const UserAuctioning = () => {
   const [value, setValue] = useState("1");
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { userInfo } = useSelector((state) => state.auth);
+
+  const handleViewProfile = () => {
+    navigate("/userAuctioning/auctioneerProfile", {
+      state: { userInfo },
+    });
+  };
+  const handleProceed = () => {
+    if (value == 1) {
+      if (!userInfo?.auctioneer) {
+        toast({
+          title: "Please Setup your profile to get started with auctioning",
+          status: `error`,
+          duration: 9000,
+          isClosable: true,
+        });
+      } else {
+        navigate("/userAuctioning/createEnglishAuction");
+      }
+    }
+    if (value == 2) {
+      if (!userInfo?.auctioneer) {
+        toast({
+          title: "Please Setup your profile to get started with auctioning",
+          status: `error`,
+          duration: 9000,
+          isClosable: true,
+        });
+      } else {
+        navigate("/userAuctioning/createReverseAuction");
+      }
+    }
+  };
+
   return (
     <Flex
       direction="column"
       px={{ md: "12", base: "10" }}
       py={{ md: "6", base: "4" }}
     >
-      <Text fontWeight={"bold"} pb="2">
-        Select an Auction type
-      </Text>
+      <Flex flexDirection={"row"} justifyContent={"space-between"}>
+        <Text fontWeight={"bold"} pb="2">
+          Select an Auction type
+        </Text>
+        <Button size={"sm"} mb={{ base: "1rem" }} onClick={handleViewProfile}>
+          {userInfo.auctioneer ? "View Profile" : "Setup Profile"}
+        </Button>
+      </Flex>
       <Box
         display={{ base: "flex", md: "flex" }}
         flexDirection={{ md: "row", base: "column" }}
@@ -27,7 +72,7 @@ const UserAuctioning = () => {
       >
         <Box>
           <RadioGroup
-            onChange={setValue}
+            onChange={(newValue) => setValue(newValue)}
             value={value}
             display={{ md: "flex" }}
             flexDirection={{ md: "row" }}
@@ -64,8 +109,10 @@ const UserAuctioning = () => {
             mt={{ base: "4" }}
             bgColor="blue.50"
             _hover={{ backgroundColor: "blue.400", color: "white" }}
+            onClick={handleProceed}
           >
-            Proceed with the selected Auction type
+            Proceed with the{" "}
+            {value == 1 ? "English Auction" : "Reverse Auction"}
           </Button>
         </Box>
       </Box>

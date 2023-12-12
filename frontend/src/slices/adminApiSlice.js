@@ -3,11 +3,10 @@ import { apiSlice } from "./apiSlice";
 
 export const userAdminApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    listUsers: builder.mutation({
-      query: (data) => ({
+    listUsers: builder.query({
+      query: () => ({
         url: `${ADMIN_URL}/listUsers`,
         method: "GET",
-        body: data,
       }),
     }),
     loginAdmin: builder.mutation({
@@ -24,7 +23,32 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    listEnglishAuctionsAdmin: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/listEnglishAuctionsAdmin`,
+        method: "GET",
+      }),
+    }),
+    listReverseAuctionsAdmin: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/listReverseAuctionsAdmin`,
+        method: "GET",
+      }),
+    }),
+    listAuctioneers: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/listAuctioneers`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useListUsersMutation, useLoginAdminMutation, useBlockUnblockUserMutation } = userAdminApiSlice;
+export const {
+  useListUsersQuery,
+  useLoginAdminMutation,
+  useBlockUnblockUserMutation,
+  useListEnglishAuctionsAdminQuery,
+  useListReverseAuctionsAdminQuery,
+  useListAuctioneersQuery
+} = userAdminApiSlice;

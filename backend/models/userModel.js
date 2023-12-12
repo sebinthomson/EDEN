@@ -17,19 +17,22 @@ const userSchema = mongoose.Schema(
     },
     oAuthLogin: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isBlocked: {
       type: Boolean,
-      default: false
+      default: false,
     },
     auctioneer: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isAdmin: {
       type: Boolean,
       default: false,
+    },
+    token: {
+      type: String,
     },
   },
   {

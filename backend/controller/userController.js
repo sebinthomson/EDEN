@@ -4,19 +4,20 @@ import User from "../models/userModel.js";
 import {
   sendVerificationMailHelper,
   registerUserHelper,
+  updatePasswordUserHelper,
 } from "../helper/userHelper.js";
-import { newEnglishAuction } from "../helper/auctionHelper.js";
 import Randomstring from "randomstring";
 
 const sendVerifyMail = asyncHandler(async (req, res) => {
   const { name, email } = req.body;
   const existEmail = await User.findOne({ email: email });
   if (existEmail) {
-    return res.status(400).json({ error: "Email already exists." });
+    res.status(401);
+    throw new Error("Email already exists");
   }
 
   const otp = Randomstring.generate({ length: 4, charset: "numeric" });
-  console.log("Generated OTP", otp);
+  console.log("Generated OTP for", name, ":", otp);
 
   req.session = req.session || {};
   req.session.tempOtp = otp;
@@ -25,13 +26,57 @@ const sendVerifyMail = asyncHandler(async (req, res) => {
   return res.status(200).json({ otpSend: true });
 });
 
+const forgotPasswordOTP = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const existEmail = await User.findOne({ email: email });
+  console.log(existEmail);
+  if (!existEmail) {
+    res.status(401);
+    throw new Error(`${email} is not a registered email`);
+  }
+
+  const otp = Randomstring.generate({ length: 4, charset: "numeric" });
+  console.log("Generated OTP for", existEmail.name, ":", otp);
+
+  req.session = req.session || {};
+  req.session.tempOtp = otp;
+
+  sendVerificationMailHelper(existEmail.name, email, otp);
+  return res.status(200).json({ otpSend: true });
+});
+
+const confirmForgotPasswordOTP = asyncHandler(async (req, res) => {
+  const { otpPin } = req.body;
+  const actualOTP = req.session.tempOtp;
+  if (actualOTP === otpPin) {
+    res.status(201).json({ message: "OTP Verified" });
+  } else {
+    res.status(401);
+    throw new Error("Error while OTP verification");
+  }
+});
+
+const changePasswordUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  await updatePasswordUserHelper(email, password);
+  let user = await User.findOne({ email, email });
+  const token = generateToken(res, user._id);
+  await User.updateOne({ email: email }, { token: token });
+  user = await User.findOne({ email: email });
+  res.status(201).json({
+    user: user,
+  });
+});
+
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, otpPin } = req.body;
   const actualOTP = req.session.tempOtp;
   if (actualOTP === otpPin) {
-    const user = await registerUserHelper(name, email, password);
-    console.log(user);
+    let user = await registerUserHelper(name, email, password);
     res.status(201).json({ user: user });
+    const token = generateToken(res, user._id);
+    await User.updateOne({ email: email }, { token: token });
+    user = await User.findOne({ email: email });
   } else {
     res.status(401);
     throw new Error("Error while creating user");
@@ -40,13 +85,20 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email: email });
+  let user = await User.findOne({ email: email });
 
   if (user && (await user.matchPassword(password))) {
-    generateToken(res, user._id);
-    res.status(201).json({
-      user: user,
-    });
+    if (user.isBlocked) {
+      res.status(403);
+      throw new Error("User Blocked");
+    } else {
+      const token = generateToken(res, user._id);
+      await User.updateOne({ email: email }, { token: token });
+      user = await User.findOne({ email: email });
+      res.status(201).json({
+        user: user,
+      });
+    }
   } else {
     res.status(401);
     throw new Error("Invalid email or password");
@@ -55,16 +107,20 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const oAuthLoginUser = asyncHandler(async (req, res) => {
   const { name, email, oAuthLogin } = req.body;
-  const user = await User.findOne({ email: email });
+  let user = await User.findOne({ email: email });
 
   if (user) {
-    generateToken(res, user._id);
+    const token = generateToken(res, user._id);
+    await User.updateOne({ email: email }, { token: token });
+    user = await User.findOne({ email: email });
     res.status(201).json({
       user: user,
     });
   } else if (!user) {
-    const user = await registerUserHelper(name, email, oAuthLogin);
-    generateToken(res, user._id);
+    let user = registerUserHelper(name, email, oAuthLogin);
+    const token = generateToken(res, user._id);
+    await User.updateOne({ email: email }, { token: token });
+    user = await User.findOne({ email: email });
     res.status(201).json({
       user: user,
     });
@@ -79,86 +135,13 @@ const logoutUser = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "User Logged Out", logout: true });
 });
 
-const newAuctionUser = asyncHandler(async (req, res) => {
-  const {
-    user,
-    item,
-    quantity,
-    startingBid,
-    startsOn,
-    endsOn,
-    englishAuction,
-  } = req.body;
-  console.log(
-    "hello",
-    user,
-    item,
-    quantity,
-    startingBid,
-    startsOn,
-    endsOn,
-    englishAuction,
-    "hello"
-  );
-  const image = [];
-  for (let obj of req.files) {
-    image.push(obj.filename);
-  }
-  if (req.body.englishAuction) {
-    const auction = await newEnglishAuction(
-      user,
-      item,
-      quantity,
-      startingBid,
-      startsOn,
-      endsOn,
-      image
-    );
-    res.status(200).json({ newEnglishAuction: auction });
-  }
-});
-
-const updateUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    if (req.body.password) user.password = req.body.password;
-    const updatedUser = await user.save();
-    res.status(200).json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-    });
-  } else {
-    res.status(404);
-    throw new Error("User not found");
-  }
-});
-
-const updateUserImage = asyncHandler(async (req, res) => {
-  try {
-    if (req.file) {
-      User.findByIdAndUpdate(
-        { _id: req.body.id },
-        { profileImage: req.file.filename }
-      ).catch((err) => {
-        console.log(err.message);
-      });
-      res.status(200).json({ profileImage: req.file.filename });
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-});
-
 export {
   sendVerifyMail,
   registerUser,
   loginUser,
   oAuthLoginUser,
   logoutUser,
-  newAuctionUser,
-  updateUserProfile,
-  updateUserImage,
+  forgotPasswordOTP,
+  confirmForgotPasswordOTP,
+  changePasswordUser,
 };

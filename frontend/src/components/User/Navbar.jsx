@@ -26,7 +26,7 @@ const Navbar = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const toast = useToast();
-  const [logoutUserApi, { isLoadingLogoutUserApi }] = useLogoutUserMutation();
+  const [logoutUserApi] = useLogoutUserMutation();
   const handleLogout = async () => {
     try {
       const res = await logoutUserApi({}).unwrap();

@@ -4,7 +4,6 @@ import User from "../models/userModel.js";
 
 //verifyMail//otpgenerate
 const sendVerificationMailHelper = asyncHandler(async (name, email, otp) => {
-  console.log(name, email, otp, "hello");
   const transporter = nodeMailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -48,6 +47,15 @@ const registerUserHelper = asyncHandler(
   }
 );
 
+const updatePasswordUserHelper = asyncHandler(async (email, password) => {
+  return await User.updateOne(
+    { email: email },
+    { $set: { password: password } }
+  );
+});
 
-
-export { sendVerificationMailHelper, registerUserHelper };
+export {
+  sendVerificationMailHelper,
+  registerUserHelper,
+  updatePasswordUserHelper,
+};

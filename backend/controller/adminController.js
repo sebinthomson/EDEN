@@ -18,7 +18,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
 const listUsers = asyncHandler(async (req, res) => {
   try {
     const users = await User.find({ isAdmin: false });
-    res.status(201).json({ users });
+    res.status(201).json(users);
   } catch (error) {
     console.log(error.message);
   }

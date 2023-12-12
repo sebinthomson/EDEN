@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import User from "./userModel.js";
 
-const englishAuctionSchema = mongoose.Schema(
+const reverseAuctionSchema = mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -16,20 +16,12 @@ const englishAuctionSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    startingBid: {
-      type: Number,
-      required: true,
-    },
     startsOn: {
       type: Date,
       required: true,
     },
     endsOn: {
       type: Date,
-      required: true,
-    },
-    images: {
-      type: Array,
       required: true,
     },
     biddingHistory: {
@@ -73,6 +65,6 @@ const englishAuctionSchema = mongoose.Schema(
   }
 );
 
-const EnglishAuction = mongoose.model("EnglishAuction", englishAuctionSchema);
+const ReverseAuction = mongoose.model("ReverseAuction", reverseAuctionSchema);
 
-export default EnglishAuction;
+export default ReverseAuction;

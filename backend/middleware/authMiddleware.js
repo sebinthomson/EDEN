@@ -13,7 +13,12 @@ const protect = asyncHandler(async (req, res, next) => {
 
       req.user = await User.findById(decoded.userId).select("-password");
 
-      next();
+      if (req.user.isBlocked) {
+        res.status(406);
+        res.json({ message: "User blocked" });
+      } else {
+        next();
+      }
     } catch (error) {
       res.status(401);
       throw new Error("Not Authorized, invalid token");

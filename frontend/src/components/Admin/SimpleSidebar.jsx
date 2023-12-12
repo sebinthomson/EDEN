@@ -16,13 +16,23 @@ import Logo from "../Logo";
 
 const LinkItems = [
   { name: "Users", icon: FiUser, link: "/admin/listUsers" },
-  { name: "Auctions", icon: FiActivity, link: "/admin/listAuctions" },
+  { name: "Auctioneers", icon: FiUser, link: "/admin/listAuctioneers" },
+  {
+    name: "English Auctions",
+    icon: FiActivity,
+    link: "/admin/listEnglishAuctions",
+  },
+  {
+    name: "Reverse Auctions",
+    icon: FiActivity,
+    link: "/admin/listReverseAuctions",
+  },
 ];
 
 function SimpleSidebar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
+    <Box minH="100vh" bg={useColorModeValue("white.100", "white.900")}>
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}

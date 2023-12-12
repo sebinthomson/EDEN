@@ -3,7 +3,7 @@ const Logo = () => {
   return (
     <Flex alignItems="flex-start" direction='column' >
       <Image
-        src="../../public/Images/logo.png"
+        src="/Images/logo.png"
         fit="contain"
         boxSize="55px"
         mb='-20px'

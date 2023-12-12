@@ -34,13 +34,13 @@ import {
 import BreadCrumbs from "../../components/Admin/BreadCrumbs";
 import { useState, useRef, useEffect } from "react";
 import {
-  useListUsersQuery,
+  useListAuctioneersQuery,
   useBlockUnblockUserMutation,
 } from "../../slices/adminApiSlice";
 import Pagination from "../../components/Admin/Pagination";
 import moment from "moment";
 
-const AdminListUsers = () => {
+const AdminListAuctioneers = () => {
   const [totalUsers, setTotalUsers] = useState();
   const [userDetail, setUserDetail] = useState();
   const [startIndex, setStartIndex] = useState();
@@ -48,7 +48,7 @@ const AdminListUsers = () => {
   const [endIndex, setEndIndex] = useState();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef(null);
-  const { data: users, error, refetch } = useListUsersQuery();
+  const { data: users, error, refetch } = useListAuctioneersQuery();
   useEffect(() => {
     if (users) {
       setTotalUsers(users.length);
@@ -101,8 +101,8 @@ const AdminListUsers = () => {
               {usersDetails.map((user) => (
                 <Tr key={user._id}>
                   <Td>{user._id}</Td>
-                  <Td>{user.name}</Td>
-                  <Td>{user.isBlocked ? "Blocked" : "Active"}</Td>
+                  <Td>{user?.user.name}</Td>
+                  <Td>{user.user.isBlocked ? "Blocked" : "Active"}</Td>
                   <Td>
                     <Menu>
                       <MenuButton
@@ -122,11 +122,11 @@ const AdminListUsers = () => {
                         >
                           User Details
                         </MenuItem>
-                        {user.isBlocked ? (
+                        {user.user.isBlocked ? (
                           <MenuItem
                             icon={<NotAllowedIcon />}
                             onClick={() =>
-                              userAction({ block: false, userId: user._id })
+                              userAction({ block: false, userId: user.user._id })
                             }
                           >
                             UnBlock {user.name}
@@ -135,7 +135,7 @@ const AdminListUsers = () => {
                           <MenuItem
                             icon={<NotAllowedIcon />}
                             onClick={() =>
-                              userAction({ block: true, userId: user._id })
+                              userAction({ block: true, userId: user.user._id })
                             }
                           >
                             Block {user.name}
@@ -169,29 +169,33 @@ const AdminListUsers = () => {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>User Details - {userDetail?.name}</DrawerHeader>
+          <DrawerHeader>Auctioneer Details - {userDetail?._id}</DrawerHeader>
 
           <DrawerBody>
             <VStack alignItems="flex-start" spacing="2">
               <Box>
                 <Text as="B">User Id:</Text>
-                <Text>{userDetail?._id}</Text>
+                <Text>{userDetail?.user._id}</Text>
               </Box>
               <Box>
                 <Text as="B">User Name:</Text>
-                <Text>{userDetail?.name}</Text>
+                <Text>{userDetail?.user.name}</Text>
               </Box>
               <Box>
                 <Text as="B">User Email:</Text>
-                <Text>{userDetail?.email}</Text>
+                <Text>{userDetail?.user.email}</Text>
+              </Box>
+              <Box>
+                <Text as="B">Auctioneer Mobile Number:</Text>
+                <Text>{userDetail?.mobileNumber}</Text>
+              </Box>
+              <Box>
+                <Text as="B">Location:</Text>
+                <Text>{userDetail?.location}</Text>
               </Box>
               <Box>
                 <Text as="B">Status:</Text>
                 <Text>{userDetail?.isBlocked ? "Blocked" : "Active"}</Text>
-              </Box>
-              <Box>
-                <Text as="B">Auctioneer:</Text>
-                <Text>{userDetail?.auctioneer ? "Yes" : "No"}</Text>
               </Box>
               <Box>
                 <Text as="B">Joined On:</Text>
@@ -209,4 +213,4 @@ const AdminListUsers = () => {
   );
 };
 
-export default AdminListUsers;
+export default AdminListAuctioneers;

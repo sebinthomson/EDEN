@@ -8,11 +8,23 @@ import {
   adminEditUser,
   adminGetUser,
 } from "../controller/adminController.js";
+import {
+  listEnglishAuctionsAdmin,
+  listReverseAuctionsAdmin,
+} from "../controller/auctionController.js";
+import { listAuctioneers } from "../controller/auctioneerController.js";
+
 const router = express.Router();
 
 router.post("/loginAdmin", loginAdmin);
+
 router.get("/listUsers", listUsers);
 router.post("/blockUnblockUser", blockUnblockUser);
+
+router.get("/listAuctioneers", listAuctioneers);
+
+router.get("/listEnglishAuctionsAdmin", listEnglishAuctionsAdmin);
+router.get("/listReverseAuctionsAdmin", listReverseAuctionsAdmin);
 
 router.post("/search-users", adminSearchUsers);
 router.post("/get-user", adminGetUser);

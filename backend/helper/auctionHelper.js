@@ -1,9 +1,12 @@
 import asyncHandler from "express-async-handler";
 import EnglishAuction from "../models/EnglishAuctionModel.js";
+import ReverseAuction from "../models/ReverseAuctionModel.js";
+import Biddings from "../models/biddingsModel.js";
+import Bid from "../models/bidsModel.js";
 
 const newEnglishAuction = asyncHandler(
   async (user, item, quantity, startingBid, startsOn, endsOn, image) => {
-    return await EnglishAuction.create({
+    const englishAuction = await EnglishAuction.create({
       user,
       item,
       quantity,
@@ -12,6 +15,39 @@ const newEnglishAuction = asyncHandler(
       endsOn,
       images: image,
     });
+    return await englishAuction.populate("user");
   }
 );
-export { newEnglishAuction };
+
+const newReverseAuction = asyncHandler(
+  async (user, item, quantity, startsOn, endsOn) => {
+    const reverseAuction = await ReverseAuction.create({
+      user,
+      item,
+      quantity,
+      startsOn,
+      endsOn,
+    });
+    return await reverseAuction.populate("user");
+  }
+);
+
+const startBidding = asyncHandler(
+  async (auctionId, users, isEnglishAuction) => {
+    const bidding = await Biddings.create({
+      auctionId: auctionId,
+      users: users,
+      isEnglishAuction: isEnglishAuction,
+    });
+    return bidding;
+  }
+);
+
+const biddingHistory = asyncHandler(async (biddingsId) => {
+  const bids = await Bid.find({ biddings: biddingsId })
+    .populate("sender", "name email")
+    .populate("biddings");
+  return bids;
+});
+
+export { newEnglishAuction, newReverseAuction, startBidding, biddingHistory };

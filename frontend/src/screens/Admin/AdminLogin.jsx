@@ -67,90 +67,88 @@ const AdminLogin = () => {
     }
   };
   return (
-    <div>
-      <Container
-        maxW="lg"
-        pt={{
-          base: "5",
-          md: "10",
-        }}
-        px={{
-          base: "0",
-          sm: "8",
-        }}
-      >
-        <Stack spacing="4">
-          <Stack spacing="3" alignItems="center">
-            <Logo />
-            <Heading
-              size={{
-                base: "xs",
-                md: "sm",
-              }}
-            >
-              Admin Account Login
-            </Heading>
-          </Stack>
-          <Box
-            py={{
-              base: "0",
-              sm: "8",
-            }}
-            px={{
-              base: "4",
-              sm: "10",
-            }}
-            bg={{
-              base: "transparent",
-              sm: "bg.surface",
-            }}
-            boxShadow={{
-              base: "none",
-              sm: "md",
-            }}
-            borderRadius={{
-              base: "none",
-              sm: "xl",
+    <Container
+      maxW="lg"
+      pt={{
+        base: "5",
+        md: "10",
+      }}
+      px={{
+        base: "0",
+        sm: "8",
+      }}
+    >
+      <Stack spacing="4">
+        <Stack spacing="3" alignItems="center">
+          <Logo />
+          <Heading
+            size={{
+              base: "xs",
+              md: "sm",
             }}
           >
-            <Stack spacing="3">
-              <FormControl>
-                <FormLabel htmlFor="email">Email</FormLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <InputGroup>
-                  <InputRightElement>
-                    <IconButton
-                      variant="text"
-                      aria-label={isOpen ? "Mask password" : "Reveal password"}
-                      icon={isOpen ? <HiEyeOff /> : <HiEye />}
-                      onClick={onClickReveal}
-                    />
-                  </InputRightElement>
-                  <Input
-                    id="password"
-                    ref={mergeRef}
-                    name="password"
-                    type={isOpen ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </InputGroup>
-              </FormControl>
-              <Button onClick={handleLogin}>Login</Button>
-            </Stack>
-          </Box>
+            Admin Account Login
+          </Heading>
         </Stack>
-      </Container>
-    </div>
+        <Box
+          py={{
+            base: "0",
+            sm: "8",
+          }}
+          px={{
+            base: "4",
+            sm: "10",
+          }}
+          bg={{
+            base: "transparent",
+            sm: "bg.surface",
+          }}
+          boxShadow={{
+            base: "none",
+            sm: "md",
+          }}
+          borderRadius={{
+            base: "none",
+            sm: "xl",
+          }}
+        >
+          <Stack spacing="3">
+            <FormControl>
+              <FormLabel htmlFor="email">Email</FormLabel>
+              <Input
+                id="email"
+                type="email"
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="password">Password</FormLabel>
+              <InputGroup>
+                <InputRightElement>
+                  <IconButton
+                    variant="text"
+                    aria-label={isOpen ? "Mask password" : "Reveal password"}
+                    icon={isOpen ? <HiEyeOff /> : <HiEye />}
+                    onClick={onClickReveal}
+                  />
+                </InputRightElement>
+                <Input
+                  id="password"
+                  ref={mergeRef}
+                  name="password"
+                  type={isOpen ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </InputGroup>
+            </FormControl>
+            <Button onClick={handleLogin}>Login</Button>
+          </Stack>
+        </Box>
+      </Stack>
+    </Container>
   );
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import {
   FormControl,
   FormLabel,
@@ -28,23 +29,26 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
   useLoginUserMutation,
+  useForgotPasswordOTPMutation,
   useOAuthLoginUserMutation,
 } from "../../slices/userApiSlice";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../slices/userAuthSlice";
+import UserForgotAndConfirmPassword from "./UserForgotAndConfirmPassword";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [forgotPassword, setForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { isOpen, onToggle } = useDisclosure();
   const inputRef = useRef(null);
   const dispatch = useDispatch();
   const mergeRef = useMergeRefs(inputRef);
   const toast = useToast();
-  const [loginUserApi, { isLoadingLoginUserApi }] = useLoginUserMutation();
-  const [oAuthLoginUserApi, { isLoadingOAuthLoginUserApi }] =
-    useOAuthLoginUserMutation();
+  const [loginUserApi] = useLoginUserMutation();
+  const [oAuthLoginUserApi] = useOAuthLoginUserMutation();
+  const [forgotPasswordOTPApi] = useForgotPasswordOTPMutation();
   const onClickReveal = () => {
     onToggle();
     if (inputRef.current) {
@@ -64,9 +68,8 @@ const UserLogin = () => {
     } else {
       try {
         const res = await loginUserApi({ email, password }).unwrap();
-        console.log(res);
         if (res.user) {
-          dispatch(setCredentials({ ...res }));
+          dispatch(setCredentials({ ...res.user }));
           navigate("/");
         }
       } catch (err) {
@@ -86,9 +89,9 @@ const UserLogin = () => {
         email: credentials.email,
         oAuthLogin: true,
       });
-      console.log("res:", res);
+
       if (res.data.user) {
-        dispatch(setCredentials({ ...res.data }));
+        dispatch(setCredentials({ ...res.data.user }));
         navigate("/");
       }
     } catch (err) {
@@ -100,147 +103,177 @@ const UserLogin = () => {
       });
     }
   };
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Please enter your registered email",
+        status: `error`,
+        duration: 9000,
+        isClosable: true,
+      });
+    } else {
+      try {
+        await forgotPasswordOTPApi({ email }).unwrap();
+        setForgotPassword(true);
+      } catch (err) {
+        toast({
+          title: `${err?.data?.message || err.error}`,
+          status: `error`,
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    }
+  };
   return (
-    <div>
-      <Container
-        maxW="lg"
-        pt={{
-          base: "5",
-          md: "10",
-        }}
-        px={{
-          base: "0",
-          sm: "8",
-        }}
-      >
-        <Stack spacing="4">
-          <Stack spacing="3" alignItems="center">
-            <Logo />
-            <Stack
-              spacing={{
-                base: "",
-                md: "",
-              }}
-              textAlign="center"
-            >
-              <Heading
-                size={{
-                  base: "xs",
-                  md: "sm",
+    <>
+      {forgotPassword ? (
+        <UserForgotAndConfirmPassword email={email} />
+      ) : (
+        <Container
+          maxW="lg"
+          pt={{
+            base: "5",
+            md: "10",
+          }}
+          px={{
+            base: "0",
+            sm: "8",
+          }}
+        >
+          <Stack spacing="4">
+            <Stack spacing="3" alignItems="center">
+              <Logo />
+              <Stack
+                spacing={{
+                  base: "",
+                  md: "",
                 }}
+                textAlign="center"
               >
-                Log in to your account
-              </Heading>
-              <Text color="fg.muted">
-                Don't have an account?{" "}
-                <Link
-                  textColor="blue"
-                  fontWeight="500"
-                  _hover={{
-                    textDecoration: "none",
-                    fontWeight: "bold",
-                    color: "darkblue",
+                <Heading
+                  size={{
+                    base: "xs",
+                    md: "sm",
                   }}
-                  onClick={() => navigate("/userRegister")}
                 >
-                  Sign up
-                </Link>
-              </Text>
+                  Log in to your account
+                </Heading>
+                <Text color="fg.muted">
+                  Don't have an account?{" "}
+                  <Link
+                    textColor="blue"
+                    fontWeight="500"
+                    _hover={{
+                      textDecoration: "none",
+                      fontWeight: "bold",
+                      color: "darkblue",
+                    }}
+                    onClick={() => navigate("/userRegister")}
+                  >
+                    Sign up
+                  </Link>
+                </Text>
+              </Stack>
             </Stack>
-          </Stack>
-          <Box
-            py={{
-              base: "0",
-              sm: "8",
-            }}
-            px={{
-              base: "4",
-              sm: "10",
-            }}
-            bg={{
-              base: "transparent",
-              sm: "bg.surface",
-            }}
-            boxShadow={{
-              base: "none",
-              sm: "md",
-            }}
-            borderRadius={{
-              base: "none",
-              sm: "xl",
-            }}
-          >
-            <Stack spacing="3">
-              <Stack spacing="2">
-                <FormControl>
-                  <FormLabel htmlFor="email">Email</FormLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <InputGroup>
-                    <InputRightElement>
-                      <IconButton
-                        variant="text"
-                        aria-label={
-                          isOpen ? "Mask password" : "Reveal password"
-                        }
-                        icon={isOpen ? <HiEyeOff /> : <HiEye />}
-                        onClick={onClickReveal}
-                      />
-                    </InputRightElement>
+            <Box
+              py={{
+                base: "0",
+                sm: "8",
+              }}
+              px={{
+                base: "4",
+                sm: "10",
+              }}
+              bg={{
+                base: "transparent",
+                sm: "bg.surface",
+              }}
+              boxShadow={{
+                base: "none",
+                sm: "md",
+              }}
+              borderRadius={{
+                base: "none",
+                sm: "xl",
+              }}
+            >
+              <Stack spacing="3">
+                <Stack spacing="2">
+                  <FormControl>
+                    <FormLabel htmlFor="email">Email</FormLabel>
                     <Input
-                      id="password"
-                      ref={mergeRef}
-                      name="password"
-                      type={isOpen ? "text" : "password"}
-                      autoComplete="current-password"
+                      id="email"
+                      type="email"
+                      onChange={(e) => setEmail(e.target.value)}
                       required
-                      onChange={(e) => setPassword(e.target.value)}
                     />
-                  </InputGroup>
-                </FormControl>
-              </Stack>
-              {/* <HStack justify="space-between">
-                <Button variant="text" size="sm">
-                  Forgot password?
-                </Button>
-              </HStack> */}
-              <Stack spacing="2">
-                <Button onClick={handleSignIn}>Sign in</Button>
-                <HStack>
-                  <Divider />
-                  <Text textStyle="sm" whiteSpace="nowrap" color="fg.muted">
-                    or
-                  </Text>
-                  <Divider />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <InputGroup>
+                      <InputRightElement>
+                        <IconButton
+                          variant="text"
+                          aria-label={
+                            isOpen ? "Mask password" : "Reveal password"
+                          }
+                          icon={isOpen ? <HiEyeOff /> : <HiEye />}
+                          onClick={onClickReveal}
+                        />
+                      </InputRightElement>
+                      <Input
+                        id="password"
+                        ref={mergeRef}
+                        name="password"
+                        type={isOpen ? "text" : "password"}
+                        autoComplete="current-password"
+                        required
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </InputGroup>
+                  </FormControl>
+                </Stack>
+                <HStack justify="space-between">
+                  <Button
+                    variant="text"
+                    size="sm"
+                    onClick={handleForgotPassword}
+                  >
+                    Forgot password?
+                  </Button>
                 </HStack>
-                <Flex justifyContent={"space-around"}>
-                  <GoogleOAuthProvider clientId="125796492188-9o7hh2f1pin40qa2v4bltacu3kgo204g.apps.googleusercontent.com">
-                    <GoogleLogin
-                      onSuccess={(credentialResponse) => {
-                        const decoded = jwtDecode(
-                          credentialResponse.credential
-                        );
-                        handleOAuth(decoded);
-                      }}
-                      onError={() => {
-                        console.log("Login Failed");
-                      }}
-                    />
-                  </GoogleOAuthProvider>
-                </Flex>
+                <Stack spacing="2">
+                  <Button onClick={handleSignIn}>Sign in</Button>
+                  <HStack>
+                    <Divider />
+                    <Text textStyle="sm" whiteSpace="nowrap" color="fg.muted">
+                      or
+                    </Text>
+                    <Divider />
+                  </HStack>
+                  <Flex justifyContent={"space-around"}>
+                    <GoogleOAuthProvider clientId="125796492188-9o7hh2f1pin40qa2v4bltacu3kgo204g.apps.googleusercontent.com">
+                      <GoogleLogin
+                        onSuccess={(credentialResponse) => {
+                          const decoded = jwtDecode(
+                            credentialResponse.credential
+                          );
+                          handleOAuth(decoded);
+                        }}
+                        onError={() => {
+                          console.log("Login Failed");
+                        }}
+                      />
+                    </GoogleOAuthProvider>
+                  </Flex>
+                </Stack>
               </Stack>
-            </Stack>
-          </Box>
-        </Stack>
-      </Container>
-    </div>
+            </Box>
+          </Stack>
+        </Container>
+      )}
+    </>
   );
 };
 

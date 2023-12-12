@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {
   FormControl,
   FormLabel,
@@ -8,11 +9,8 @@ import {
   Box,
   Button,
   Container,
-  Divider,
-  Flex,
   Heading,
   HStack,
-  Link,
   Stack,
   Text,
   useDisclosure,
@@ -24,35 +22,30 @@ import {
 import { useRef, useState } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import Logo from "../../components/Logo";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-import {
-  useRegisterUserMutation,
-  useSendVerifyMailMutation,
-  useOAuthLoginUserMutation,
-} from "../../slices/userApiSlice";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../slices/userAuthSlice";
+import {
+  useConfirmForgotPasswordOTPMutation,
+  useChangePasswordUserMutation,
+} from "../../slices/userApiSlice";
 
-const UserRegister = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+const UserForgotAndConfirmPassword = ({ email }) => {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [otp1, setOtp1] = useState("");
   const [otp2, setOtp2] = useState("");
   const [otp3, setOtp3] = useState("");
   const [otp4, setOtp4] = useState("");
-  const [otpPage, setOtpPage] = useState(false);
+  const [otpPage, setOtpPage] = useState(true);
   const inputRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [confirmForgotPasswordOTPApi] = useConfirmForgotPasswordOTPMutation();
+  const [changePasswordApi] = useChangePasswordUserMutation();
   const { isOpen, onToggle } = useDisclosure();
   const mergeRef = useMergeRefs(inputRef);
   const toast = useToast();
-  const [sendVerifyMailApi] = useSendVerifyMailMutation();
-  const [registerUserApi] = useRegisterUserMutation();
-  const [oAuthLoginUserApi] = useOAuthLoginUserMutation();
   const onClickReveal = () => {
     onToggle();
     if (inputRef.current) {
@@ -61,26 +54,23 @@ const UserRegister = () => {
       });
     }
   };
-  const handleSignUp = async () => {
-    if (!name.trim() || !email.trim() || !password.trim()) {
+  const handlePasswordChange = async () => {
+    if (
+      !password.trim() ||
+      !confirmPassword.trim() ||
+      !(password === confirmPassword)
+    ) {
       toast({
-        title: "Empty fields, Please enter values",
+        title: "Passwords doesn't match",
         status: `error`,
         duration: 9000,
         isClosable: true,
       });
     } else {
       try {
-        const res = await sendVerifyMailApi({ name, email }).unwrap();
-        if (res.otpSend) {
-          setOtpPage(true);
-          toast({
-            title: `OTP send to ${email}`,
-            status: `success`,
-            duration: 9000,
-            isClosable: true,
-          });
-        }
+        const res = await changePasswordApi({ email, password }).unwrap();
+        dispatch(setCredentials({ ...res.user }));
+        navigate("/");
       } catch (err) {
         toast({
           title: `${err?.data?.message || err.error}`,
@@ -92,31 +82,16 @@ const UserRegister = () => {
     }
   };
   const handleVerify = async () => {
-    if (otp1 && otp2 && otp3 && otp4) {
-      const otpPin = otp1 + otp2 + otp3 + otp4;
-      const res = await registerUserApi({
-        name,
-        email,
-        password,
-        otpPin,
-      }).unwrap();
-      dispatch(setCredentials({ ...res.user }));
-
-      navigate("/");
-    }
-  };
-  const handleOAuth = async (credentials) => {
     try {
-      const res = await oAuthLoginUserApi({
-        name: credentials.given_name + credentials.family_name,
-        email: credentials.email,
-        oAuthLogin: true,
+      const otpPin = otp1 + otp2 + otp3 + otp4;
+      const res = await confirmForgotPasswordOTPApi({ otpPin }).unwrap();
+      toast({
+        title: `${res.message}`,
+        status: `success`,
+        duration: 9000,
+        isClosable: true,
       });
-
-      if (res.data.user) {
-        dispatch(setCredentials({ ...res.data.user }));
-        navigate("/");
-      }
+      setOtpPage(false);
     } catch (err) {
       toast({
         title: `${err?.data?.message || err.error}`,
@@ -126,6 +101,7 @@ const UserRegister = () => {
       });
     }
   };
+
   return (
     <Container
       maxW="lg"
@@ -154,27 +130,10 @@ const UserRegister = () => {
                 md: "sm",
               }}
             >
-              {otpPage ? "Complete your signup" : "Create your new account"}
+              {otpPage
+                ? "Complete your email verification"
+                : "Update your password"}
             </Heading>
-            {otpPage ? (
-              ""
-            ) : (
-              <Text color="fg.muted">
-                Already have an account?{" "}
-                <Link
-                  textColor="blue"
-                  fontWeight="500"
-                  _hover={{
-                    textDecoration: "none",
-                    fontWeight: "bold",
-                    color: "darkblue",
-                  }}
-                  onClick={() => navigate("/userLogin")}
-                >
-                  Sign in
-                </Link>
-              </Text>
-            )}
           </Stack>
         </Stack>
         <Box
@@ -213,34 +172,17 @@ const UserRegister = () => {
                 </HStack>
               </Stack>
               <Stack spacing="6">
-                <Button onClick={handleVerify}>Verify OTP</Button>
+                <Button
+                  isDisabled={!otp1 || !otp2 || !otp3 || !otp4}
+                  onClick={handleVerify}
+                >
+                  Verify OTP
+                </Button>
               </Stack>
             </Stack>
           ) : (
             <Stack spacing="3">
               <Stack spacing="2">
-                <FormControl>
-                  <FormLabel htmlFor="name">Name</FormLabel>
-                  <Input
-                    id="name"
-                    type="string"
-                    onChange={(e) => {
-                      setName(e.target.value);
-                    }}
-                    required
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="email">Email</FormLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                    }}
-                    required
-                  />
-                </FormControl>
                 <FormControl>
                   <FormLabel htmlFor="password">Password</FormLabel>
                   <InputGroup>
@@ -265,31 +207,33 @@ const UserRegister = () => {
                     />
                   </InputGroup>
                 </FormControl>
+                <FormControl>
+                  <FormLabel htmlFor="password">Confirm Password</FormLabel>
+                  <InputGroup>
+                    <InputRightElement>
+                      <IconButton
+                        variant="text"
+                        aria-label={
+                          isOpen ? "Mask password" : "Reveal password"
+                        }
+                        icon={isOpen ? <HiEyeOff /> : <HiEye />}
+                        onClick={onClickReveal}
+                      />
+                    </InputRightElement>
+                    <Input
+                      id="password"
+                      ref={mergeRef}
+                      name="password"
+                      type={isOpen ? "text" : "password"}
+                      autoComplete="current-password"
+                      required
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </InputGroup>
+                </FormControl>
               </Stack>
               <Stack spacing="2">
-                <Button onClick={handleSignUp}>Sign up</Button>
-                <HStack>
-                  <Divider />
-                  <Text textStyle="sm" whiteSpace="nowrap" color="fg.muted">
-                    or
-                  </Text>
-                  <Divider />
-                </HStack>
-                <Flex justifyContent={"space-around"}>
-                  <GoogleOAuthProvider clientId="125796492188-9o7hh2f1pin40qa2v4bltacu3kgo204g.apps.googleusercontent.com">
-                    <GoogleLogin
-                      onSuccess={(credentialResponse) => {
-                        const decoded = jwtDecode(
-                          credentialResponse.credential
-                        );
-                        handleOAuth(decoded);
-                      }}
-                      onError={() => {
-                        console.log("Login Failed");
-                      }}
-                    />
-                  </GoogleOAuthProvider>
-                </Flex>
+                <Button onClick={handlePasswordChange}>Change Password</Button>
               </Stack>
             </Stack>
           )}
@@ -299,4 +243,4 @@ const UserRegister = () => {
   );
 };
 
-export default UserRegister;
+export default UserForgotAndConfirmPassword;
