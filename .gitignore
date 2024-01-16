@@ -1,3 +1,4 @@
 /node_modules
 /.env
 /frontend/public/Images
+/frontend/.eslintrc.cjs
