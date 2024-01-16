@@ -1,8 +1,15 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const auctionBidding = mongoose.Schema(
   {
-    auctionId: { type: mongoose.Schema.Types.ObjectId },
+    auctionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: "auctionType",
+    },
+    auctionType: {
+      type: String,
+      enum: ["EnglishAuction", "ReverseAuction"],
+    },
     isEnglishAuction: { type: Boolean, required: true },
     users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     latestMessage: {

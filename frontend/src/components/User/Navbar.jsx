@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import Logo from "../Logo.jsx";
 import {
   Box,
@@ -200,7 +201,7 @@ const MobileNav = ({ handleLogout, user, handleLogin }) => (
         >
           <Text
             fontWeight={600}
-            color={useColorModeValue("gray.600", "gray.200")}
+            // color={useColorModeValue("gray.600", "gray.200")}
           >
             Logout
           </Text>
@@ -216,7 +217,7 @@ const MobileNav = ({ handleLogout, user, handleLogin }) => (
         >
           <Text
             fontWeight={600}
-            color={useColorModeValue("gray.600", "gray.200")}
+            // color={useColorModeValue("gray.600", "gray.200")}
           >
             Login
           </Text>
@@ -268,8 +269,8 @@ const NAV_ITEMS = [
     href: "/userAuctioning",
   },
   {
-    label: "Profile",
-    href: "/userProfile",
+    label: "Watchlist",
+    href: "/userWatchlist",
   },
 ];
 

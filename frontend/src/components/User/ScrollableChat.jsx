@@ -7,10 +7,11 @@ import { useEffect } from "react";
 
 const ScrollableChat = ({ messages, user }) => {
   useEffect(() => {}, [user]);
+  if (messages) messages = [...messages].reverse();
   return (
     user && (
       <Flex
-        flexDirection={"column"}
+        flexDirection={"column-reverse"}
         overflowY={"scroll"}
         h={300}
         my={3}
@@ -18,7 +19,7 @@ const ScrollableChat = ({ messages, user }) => {
       >
         {!messages.length && <Text>No Biddings Found</Text>}
         {messages &&
-          messages.map((m, i) => (
+          messages.map((m) => (
             <Flex alignItems={"center"} key={m._id}>
               <Tooltip
                 label={m?.sender?.name}
@@ -33,7 +34,6 @@ const ScrollableChat = ({ messages, user }) => {
                   name={m?.sender?.name}
                 />
               </Tooltip>
-
               {/* {(isSameSender(messages, m, i, user?._id) ||
                 isLastMessage(messages, i, user?._id)) && (
                 <Tooltip

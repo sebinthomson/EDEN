@@ -29,7 +29,6 @@ const sendVerifyMail = asyncHandler(async (req, res) => {
 const forgotPasswordOTP = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const existEmail = await User.findOne({ email: email });
-  console.log(existEmail);
   if (!existEmail) {
     res.status(401);
     throw new Error(`${email} is not a registered email`);

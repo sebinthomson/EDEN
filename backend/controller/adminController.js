@@ -1,11 +1,17 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
+import Auctioneer from "../models/auctioneerModel.js";
+import generateToken from "../utils/generateToken.js";
+import EnglishAuction from "../models/EnglishAuctionModel.js";
+import ReverseAuction from "../models/ReverseAuctionModel.js";
 
 const loginAdmin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email: email, isAdmin: true });
-
+  let user = await User.findOne({ email: email, isAdmin: true });
   if (user && (await user.matchPassword(password))) {
+    const token = generateToken(res, user._id);
+    await User.updateOne({ email: email }, { token: token });
+    user = await User.findOne({ email: email });
     res.status(201).json({
       admin: user,
     });
@@ -97,6 +103,151 @@ const adminGetUser = asyncHandler(async (req, res) => {
   }
 });
 
+const adminDashboard = asyncHandler(async (req, res) => {
+  try {
+    const aggregateTotalQuantity = async (auctionModel) => {
+      try {
+        const result = await auctionModel.aggregate([
+          {
+            $match: {
+              winningBid: { $ne: -1 },
+            },
+          },
+          {
+            $group: {
+              _id: { $toLower: "$item" },
+              totalQuantity: { $sum: "$quantity" },
+            },
+          },
+        ]);
+        const itemQuantities = result.map((item) => ({
+          id: item._id,
+          value: item.totalQuantity,
+        }));
+
+        return itemQuantities;
+      } catch (error) {
+        console.error("Error aggregating total quantity:", error);
+        throw error;
+      }
+    };
+
+    const calculateTotalQuantity = async (auctionModel) => {
+      try {
+        const result = await auctionModel.aggregate([
+          {
+            $match: {
+              winningBid: { $ne: -1 },
+            },
+          },
+          {
+            $group: {
+              _id: { endsOn: "$endsOn" },
+              quantity: { $sum: "$quantity" },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              date: {
+                $dateToString: {
+                  date: "$_id.endsOn",
+                  format: "%d-%m-%Y", // You can customize the format
+                },
+              },
+              quantity: 1,
+            },
+          },
+          {
+            $sort: { date: 1 },
+          },
+        ]);
+
+        return result;
+      } catch (error) {
+        console.error("Error calculating total quantity:", error);
+        throw error;
+      }
+    };
+
+    const englishAuctionItemQuantities = await aggregateTotalQuantity(
+      EnglishAuction
+    );
+    const reverseAuctionItemQuantities = await aggregateTotalQuantity(
+      ReverseAuction
+    );
+
+    const englishAuctionTotalQuantity = await calculateTotalQuantity(
+      EnglishAuction
+    );
+    const reverseAuctionTotalQuantity = await calculateTotalQuantity(
+      ReverseAuction
+    );
+    const profit = await calculateSumOfWinningBid();
+    const users = await User.find().count();
+    const auctioneers = await Auctioneer.find().count();
+    const EA = `${await EnglishAuction.find({
+      winningBid: { $ne: -1 },
+    }).count()}/${await EnglishAuction.find().count()}`;
+    const RA = `${await ReverseAuction.find({
+      winningBid: { $ne: -1 },
+    }).count()}/${await ReverseAuction.find().count()}`;
+    res.status(200).json({
+      englishAuctionItemQuantities,
+      reverseAuctionItemQuantities,
+      englishAuctionTotalQuantity,
+      reverseAuctionTotalQuantity,
+      profit,
+      users,
+      auctioneers,
+      EA,
+      RA,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "Failed to retrieve data" });
+  }
+});
+
+const calculateSumOfWinningBid = async () => {
+  try {
+    const englishAuctionSum = await EnglishAuction.aggregate([
+      {
+        $match: {
+          winningBid: { $ne: -1 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$winningBid" },
+        },
+      },
+    ]);
+    const reverseAuctionSum = await ReverseAuction.aggregate([
+      {
+        $match: {
+          winningBid: { $ne: -1 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$winningBid" },
+        },
+      },
+    ]);
+    const sumEnglishAuction =
+      englishAuctionSum.length > 0 ? englishAuctionSum[0].total : 0;
+    const sumReverseAuction =
+      reverseAuctionSum.length > 0 ? reverseAuctionSum[0].total : 0;
+    const totalSum = 0.02 * (sumEnglishAuction + sumReverseAuction);
+    return totalSum.toFixed(2);
+  } catch (error) {
+    console.error("Error calculating sum: ", error);
+  }
+};
+
 export {
   loginAdmin,
   listUsers,
@@ -105,4 +256,5 @@ export {
   adminDeleteUser,
   adminEditUser,
   adminGetUser,
+  adminDashboard,
 };

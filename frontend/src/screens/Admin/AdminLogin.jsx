@@ -54,7 +54,7 @@ const AdminLogin = () => {
         const res = await loginAdminApi({ email, password }).unwrap();
         if (res.admin) {
           dispatch(setAdminCredentials({ ...res }));
-          navigate("/admin/listUsers");
+          navigate("/admin/");
         }
       } catch (err) {
         toast({

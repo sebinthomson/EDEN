@@ -10,9 +10,9 @@ const UserHome = () => {
   const { data: auctions, error } = useListAuctionUserQuery();
   useEffect(() => {
     if (auctions?.auctions.englishAuctions)
-      setEnglishAuctions(auctions?.auctions.englishAuctions.slice(0,4));
+      setEnglishAuctions(auctions?.auctions.englishAuctions);
     if (auctions?.auctions.reverseAuctions)
-      setReverseAuctions(auctions?.auctions.reverseAuctions.slice(0,5));
+      setReverseAuctions(auctions?.auctions.reverseAuctions);
   }, [auctions]);
   const toast = useToast();
   if (error) {

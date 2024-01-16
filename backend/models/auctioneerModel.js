@@ -8,9 +8,6 @@ const auctioneerSchema = mongoose.Schema(
       required: true,
       ref: User,
     },
-    rating: {
-      type: Number,
-    },
     mobileNumber: {
       type: Number,
       required: true,

@@ -67,20 +67,18 @@ const AdminListEnglishAuctions = () => {
           <Table>
             <Thead>
               <Tr>
-                <Th>Id</Th>
+                <Th>Seller</Th>
                 <Th>Item</Th>
                 <Th>Quantity</Th>
-                <Th>Seller</Th>
                 <Th>Actions</Th>
               </Tr>
             </Thead>
             <Tbody>
               {auctions.map((auction) => (
                 <Tr key={auction._id}>
-                  <Td>{auction._id}</Td>
+                  <Td>{auction.user.name}</Td>
                   <Td>{auction.item}</Td>
                   <Td>{auction.quantity}</Td>
-                  <Td>{auction.user.name}</Td>
                   <Td>
                     <Menu>
                       <MenuButton
@@ -128,7 +126,7 @@ const AdminListEnglishAuctions = () => {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>Auction Details - {auctionDetail?._id}</DrawerHeader>
+          <DrawerHeader>Auction Details</DrawerHeader>
           <DrawerBody>
             <VStack alignItems="flex-start" spacing="2">
               <Box>

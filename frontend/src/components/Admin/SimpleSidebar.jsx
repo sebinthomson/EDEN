@@ -10,11 +10,13 @@ import {
   DrawerContent,
   useDisclosure,
 } from "@chakra-ui/react";
-import { FiMenu, FiUser, FiActivity } from "react-icons/fi";
+import { FiMenu, FiUser, FiActivity, FiBarChart } from "react-icons/fi";
 import { Outlet, useNavigate } from "react-router-dom";
 import Logo from "../Logo";
+import { CheckCircleIcon } from "@chakra-ui/icons";
 
 const LinkItems = [
+  { name: "Dashboard", icon: FiBarChart, link: "/admin/" },
   { name: "Users", icon: FiUser, link: "/admin/listUsers" },
   { name: "Auctioneers", icon: FiUser, link: "/admin/listAuctioneers" },
   {
@@ -26,6 +28,11 @@ const LinkItems = [
     name: "Reverse Auctions",
     icon: FiActivity,
     link: "/admin/listReverseAuctions",
+  },
+  {
+    name: "Approve Auctions",
+    icon: CheckCircleIcon,
+    link: "/admin/approveAuctions",
   },
 ];
 

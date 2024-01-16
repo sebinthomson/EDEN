@@ -91,8 +91,8 @@ const AdminListUsers = () => {
           <Table>
             <Thead>
               <Tr>
-                <Th>Id</Th>
                 <Th>Name</Th>
+                <Th>Email</Th>
                 <Th>Status</Th>
                 <Th>Actions</Th>
               </Tr>
@@ -100,8 +100,8 @@ const AdminListUsers = () => {
             <Tbody>
               {usersDetails.map((user) => (
                 <Tr key={user._id}>
-                  <Td>{user._id}</Td>
                   <Td>{user.name}</Td>
+                  <Td>{user.email}</Td>
                   <Td>{user.isBlocked ? "Blocked" : "Active"}</Td>
                   <Td>
                     <Menu>
@@ -169,14 +169,10 @@ const AdminListUsers = () => {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>User Details - {userDetail?.name}</DrawerHeader>
+          <DrawerHeader>User Details </DrawerHeader>
 
           <DrawerBody>
             <VStack alignItems="flex-start" spacing="2">
-              <Box>
-                <Text as="B">User Id:</Text>
-                <Text>{userDetail?._id}</Text>
-              </Box>
               <Box>
                 <Text as="B">User Name:</Text>
                 <Text>{userDetail?.name}</Text>

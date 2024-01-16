@@ -1,12 +1,28 @@
 import mongoose from "mongoose";
 import User from "./userModel.js";
 
+const reviewSchema = mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User,
+  },
+  rating: {
+    type: Number,
+  },
+  title: {
+    type: String,
+  },
+  content: {
+    type: String,
+  },
+});
+
 const reverseAuctionSchema = mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: User
+      ref: User,
     },
     item: {
       type: String,
@@ -16,6 +32,10 @@ const reverseAuctionSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    winningBid: {
+      type: Number,
+      default: -1,
+    },
     startsOn: {
       type: Date,
       required: true,
@@ -24,39 +44,8 @@ const reverseAuctionSchema = mongoose.Schema(
       type: Date,
       required: true,
     },
-    biddingHistory: {
-      type: [
-        {
-          biddingAmount: {
-            type: Number,
-            min: 0,
-          },
-          biddingTime: {
-            type: Date,
-            default: Date.now,
-          },
-        },
-      ],
-      default: [],
-    },
     review: {
-      type: [
-        {
-          user: {
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-          },
-          rating: {
-            type: Number,
-          },
-          title: {
-            type: String,
-          },
-          content: {
-            type: String,
-          },
-        },
-      ],
+      type: [reviewSchema],
       default: [],
     },
   },

@@ -31,14 +31,12 @@ const ReverseAuctionCreateForm = () => {
     } else {
       try {
         const res = await newReverseAuctionApiCall({
-          userId: userInfo.user._id,
+          userId: userInfo._id,
           item,
           quantity,
           startDate,
           endDate,
         }).unwrap();
-
-
         navigate("/userReverseAuctions/details", {
           state: { data: res.newReverseAuction },
         });

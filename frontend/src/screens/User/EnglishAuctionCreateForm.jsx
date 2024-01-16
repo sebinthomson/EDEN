@@ -43,24 +43,38 @@ const EnglishAuctionCreateForm = () => {
       endDate &&
       images.length > 0
     ) {
-      try {
-        const formData = new FormData();
-        formData.append("user", userInfo._id);
-        formData.append("item", item);
-        formData.append("quantity", quantity);
-        formData.append("startingBid", startingBid);
-        formData.append("startsOn", startDate);
-        formData.append("endsOn", endDate);
-        for (let obj of images) {
-          formData.append("images", obj);
+      console.log(new Date(endDate), new Date(startDate));
+      if (
+        Number(Date(endDate)) - Number(Date(startDate)) >=
+        24 * 60 * 60 * 1000
+      ) {
+        try {
+          const formData = new FormData();
+          formData.append("user", userInfo._id);
+          formData.append("item", item);
+          formData.append("quantity", quantity);
+          formData.append("startingBid", startingBid);
+          formData.append("startsOn", startDate);
+          formData.append("endsOn", endDate);
+          for (let obj of images) {
+            formData.append("images", obj);
+          }
+          const res = await newEnglishAuctionApiCall(formData).unwrap();
+          navigate("/userEnglishAuctions/details", {
+            state: { data: res.newEnglishAuction },
+          });
+        } catch (err) {
+          toast({
+            title: `${err?.data?.message || err.error}`,
+            status: `error`,
+            duration: 9000,
+            isClosable: true,
+          });
         }
-        const res = await newEnglishAuctionApiCall(formData).unwrap();
-        navigate("/userEnglishAuctions/details", {
-          state: { data: res.newEnglishAuction },
-        });
-      } catch (err) {
+      } else {
         toast({
-          title: `${err?.data?.message || err.error}`,
+          title:
+            "There should be a minimum gap of 24 hours between the start date and end date",
           status: `error`,
           duration: 9000,
           isClosable: true,

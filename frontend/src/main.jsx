@@ -29,6 +29,12 @@ import AuctioneerProfile from "./screens/User/AuctioneerProfile.jsx";
 import AdminListAuctioneers from "./screens/Admin/AdminListAuctioneers.jsx";
 import UserAuctions from "./screens/User/UserAuctions.jsx";
 import ChatProvider from "./context/ChatProvider.jsx";
+import AdminApproveAuctions from "./screens/Admin/AdminApproveAuctions.jsx";
+import UserSellers from "./screens/User/UserSellers.jsx";
+import SellerProfile from "./screens/User/SellerProfile.jsx";
+import AdminDashboard from "./screens/Admin/AdminDashboard.jsx";
+import ErrorPage from "./screens/ErrorPage.jsx";
+import UserWatchlist from "./screens/User/UserWatchlist.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -38,6 +44,8 @@ const router = createBrowserRouter(
       <Route path="/" element={<App />}>
         <Route path="/" element={<UserHome />} />
         <Route path="/UserAuctions" element={<UserAuctions />} />
+        <Route path="/UserSellers" element={<UserSellers />} />
+        <Route path="/UserSeller/details" element={<SellerProfile />} />
         <Route
           path="/userEnglishAuctions/details"
           element={<EnglishAuctionDetail />}
@@ -60,11 +68,16 @@ const router = createBrowserRouter(
             path="/userAuctioning/createReverseAuction"
             element={<ReverseAuctionCreateForm />}
           />
+          <Route
+            path="/userWatchlist"
+            element={<UserWatchlist/>}
+          />
         </Route>
       </Route>
 
       <Route path="/admin/adminLogin" element={<AdminLogin />} />
       <Route path="" element={<PrivateRouteAdmin />}>
+        <Route path="/admin/" element={<AdminDashboard />} />
         <Route path="/admin/listUsers" element={<AdminListUsers />} />
         <Route
           path="/admin/listAuctioneers"
@@ -78,7 +91,12 @@ const router = createBrowserRouter(
           path="/admin/listReverseAuctions"
           element={<AdminListReverseAuctions />}
         />
+        <Route
+          path="/admin/approveAuctions"
+          element={<AdminApproveAuctions />}
+        />
       </Route>
+      <Route path="*" element={<ErrorPage />} />
     </>
   )
 );

@@ -69,15 +69,11 @@ io.on("connection", (socket) => {
   socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
   socket.on("new message", (newMessageRecieved) => {
-    console.log("newMessageRecieved:", newMessageRecieved);
     var biddings = newMessageRecieved.biddings;
-
-    if (!biddings.users) return console.log("chat.users not defined");
-
-    chat.users.forEach((user) => {
-      if (user._id == newMessageRecieved.sender._id) return;
-
-      socket.in(user._id).emit("message recieved", newMessageRecieved);
+    if (!biddings.users) return console.log("other bidders not defined");
+    biddings?.users?.forEach((user) => {
+      if (user == newMessageRecieved.sender._id) return;
+      socket.in(user).emit("message recieved", newMessageRecieved);
     });
   });
 

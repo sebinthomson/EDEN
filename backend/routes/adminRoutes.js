@@ -6,17 +6,21 @@ import {
   adminSearchUsers,
   adminDeleteUser,
   adminEditUser,
-  adminGetUser,
+  adminGetUser,adminDashboard
 } from "../controller/adminController.js";
 import {
   listEnglishAuctionsAdmin,
   listReverseAuctionsAdmin,
+  approveAuctionsQuery,approveAuction
 } from "../controller/auctionController.js";
 import { listAuctioneers } from "../controller/auctioneerController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 router.post("/loginAdmin", loginAdmin);
+
+router.get("/adminDashboard", adminDashboard);
 
 router.get("/listUsers", listUsers);
 router.post("/blockUnblockUser", blockUnblockUser);
@@ -30,5 +34,8 @@ router.post("/search-users", adminSearchUsers);
 router.post("/get-user", adminGetUser);
 router.post("/delete-user", adminDeleteUser);
 router.post("/edit-user", adminEditUser);
+
+router.get("/approveAuctions", approveAuctionsQuery);
+router.post("/approveAuction", approveAuction);
 
 export default router;

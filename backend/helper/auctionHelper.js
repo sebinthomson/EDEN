@@ -34,8 +34,13 @@ const newReverseAuction = asyncHandler(
 
 const startBidding = asyncHandler(
   async (auctionId, users, isEnglishAuction) => {
+    let auctionType;
+    isEnglishAuction
+      ? (auctionType = "EnglishAuction")
+      : (auctionType = "ReverseAuction");
     const bidding = await Biddings.create({
       auctionId: auctionId,
+      auctionType: auctionType,
       users: users,
       isEnglishAuction: isEnglishAuction,
     });

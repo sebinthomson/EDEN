@@ -82,7 +82,7 @@ const AdminListAuctioneers = () => {
         <BreadCrumbs
           allPage={[
             { Name: "Admin Panel", Link: "/admin" },
-            { Name: "List Users", Link: "/admin/listUsers" },
+            { Name: "List Auctioneers", Link: "/admin/listAuctioneers" },
           ]}
         />
       </Box>
@@ -91,8 +91,9 @@ const AdminListAuctioneers = () => {
           <Table>
             <Thead>
               <Tr>
-                <Th>Id</Th>
                 <Th>Name</Th>
+                <Th>Email</Th>
+                <Th>Contact</Th>
                 <Th>Status</Th>
                 <Th>Actions</Th>
               </Tr>
@@ -100,8 +101,9 @@ const AdminListAuctioneers = () => {
             <Tbody>
               {usersDetails.map((user) => (
                 <Tr key={user._id}>
-                  <Td>{user._id}</Td>
                   <Td>{user?.user.name}</Td>
+                  <Td>{user.user.email}</Td>
+                  <Td>{user.mobileNumber}</Td>
                   <Td>{user.user.isBlocked ? "Blocked" : "Active"}</Td>
                   <Td>
                     <Menu>
@@ -120,13 +122,16 @@ const AdminListAuctioneers = () => {
                             setUserDetail(user);
                           }}
                         >
-                          User Details
+                          Auctioneer Details
                         </MenuItem>
                         {user.user.isBlocked ? (
                           <MenuItem
                             icon={<NotAllowedIcon />}
                             onClick={() =>
-                              userAction({ block: false, userId: user.user._id })
+                              userAction({
+                                block: false,
+                                userId: user.user._id,
+                              })
                             }
                           >
                             UnBlock {user.name}
@@ -169,20 +174,16 @@ const AdminListAuctioneers = () => {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>Auctioneer Details - {userDetail?._id}</DrawerHeader>
+          <DrawerHeader>Auctioneer Detail</DrawerHeader>
 
           <DrawerBody>
             <VStack alignItems="flex-start" spacing="2">
               <Box>
-                <Text as="B">User Id:</Text>
-                <Text>{userDetail?.user._id}</Text>
-              </Box>
-              <Box>
-                <Text as="B">User Name:</Text>
+                <Text as="B">Auctioneer Name:</Text>
                 <Text>{userDetail?.user.name}</Text>
               </Box>
               <Box>
-                <Text as="B">User Email:</Text>
+                <Text as="B">Auctioneer Email:</Text>
                 <Text>{userDetail?.user.email}</Text>
               </Box>
               <Box>

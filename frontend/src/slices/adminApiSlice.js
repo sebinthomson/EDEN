@@ -41,6 +41,25 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    approveAuctions: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/approveAuctions`,
+        method: "GET",
+      }),
+    }),
+    approveAuction: builder.mutation({
+      query: (data) => ({
+        url: `${ADMIN_URL}/approveAuction`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    adminDashboard: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/adminDashboard`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -50,5 +69,8 @@ export const {
   useBlockUnblockUserMutation,
   useListEnglishAuctionsAdminQuery,
   useListReverseAuctionsAdminQuery,
-  useListAuctioneersQuery
+  useListAuctioneersQuery,
+  useApproveAuctionsQuery,
+  useApproveAuctionMutation,
+  useAdminDashboardQuery,
 } = userAdminApiSlice;

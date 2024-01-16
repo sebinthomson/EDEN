@@ -92,6 +92,19 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    filterAuctions: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/filterAuctions`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    listAuctioneersUser: builder.query({
+      query: () => ({
+        url: `${USERS_URL}/listAuctioneers`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -108,5 +121,7 @@ export const {
   useNewReverseAuctionUserMutation,
   useListAuctionUserQuery,
   useLoadAuctioneerProfileQuery,
-  useProfileUpdateMutation
+  useProfileUpdateMutation,
+  useFilterAuctionsMutation,
+  useListAuctioneersUserQuery,
 } = userAdminApiSlice;

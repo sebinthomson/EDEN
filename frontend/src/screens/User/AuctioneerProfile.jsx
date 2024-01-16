@@ -22,13 +22,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { FaLocationDot } from "react-icons/fa6";
-import { FaStar, FaStarHalf } from "react-icons/fa";
 import { useLoadAuctioneerProfileQuery } from "../../slices/userApiSlice";
 import { useSelector } from "react-redux";
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useProfileUpdateMutation } from "../../slices/userApiSlice";
 import { setCredentials } from "../../slices/userAuthSlice";
+import { calculateRating } from "../../config/AuctioneerLogics";
 
 const AuctioneerProfile = () => {
   const [profile, setProfile] = useState();
@@ -52,7 +52,7 @@ const AuctioneerProfile = () => {
     if (auctioneer?.auctioneer == "Not Found") {
       setProfile(false);
     } else {
-      setProfile(auctioneer);
+      setProfile(auctioneer?.auctioneer);
     }
   }, [auctioneer, profile]);
   const handleClick = () => {
@@ -186,16 +186,8 @@ const AuctioneerProfile = () => {
               }
               alt="Profile Picture"
             />
-            <Flex color={"gray"}>
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              {/* <FaStarHalf /> */}
-            </Flex>
             <Text color={"gray"} fontWeight={"700"}>
-              {profile ? profile.rating / "5" : "-.-/-"}
+              {calculateRating(auctioneer?.reviews)}
             </Text>
           </Flex>
           <Flex

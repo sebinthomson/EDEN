@@ -13,8 +13,13 @@ import {
   newEnglishAuctionUser,
   newReverseAuctionUser,
   listAuctionUser,
+  razorpay,
+  razorpayvalidate,
+  filterAuctions,
+  review,
 } from "../controller/auctionController.js";
 import {
+  listAuctioneersUser,
   loadAuctioneerProfile,
   profileUpdate,
 } from "../controller/auctioneerController.js";
@@ -44,5 +49,10 @@ router.post(
   profileUpdateUpload.single("image"),
   profileUpdate
 );
+router.post("/razorpay", razorpay);
+router.post("/razorpayvalidate", razorpayvalidate);
+router.post("/filterAuctions", filterAuctions);
+router.post("/review", review);
+router.get("/listAuctioneers", listAuctioneersUser);
 
 export default router;
