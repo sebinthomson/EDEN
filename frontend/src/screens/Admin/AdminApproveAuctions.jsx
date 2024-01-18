@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react/no-children-prop */
 import {
   Box,
   Button,
@@ -21,6 +23,10 @@ import {
   useDisclosure,
   Flex,
   Tooltip,
+  InputGroup,
+  InputLeftElement,
+  Input,
+  InputRightAddon,
 } from "@chakra-ui/react";
 import BreadCrumbs from "../../components/Admin/BreadCrumbs.jsx";
 import Pagination from "../../components/Admin/Pagination.jsx";
@@ -32,8 +38,11 @@ import {
 import axios from "axios";
 import { useSelector } from "react-redux";
 import moment from "moment";
+import { RepeatIcon, Search2Icon } from "@chakra-ui/icons";
 
 const AdminApproveAuctions = () => {
+  const [response, setResponse] = useState([]);
+  const [search, setSearch] = useState("");
   const [auctions, setAuctions] = useState([]);
   const [auctionDetails, setAucitonDetails] = useState();
   const [startIndex, setStartIndex] = useState();
@@ -46,9 +55,13 @@ const AdminApproveAuctions = () => {
   const { data: pendingAuctions, refetch } = useApproveAuctionsQuery();
 
   useEffect(() => {
-    setTotalAuctions(pendingAuctions?.length);
-    setAuctions(pendingAuctions?.slice(startIndex, endIndex));
-  }, [pendingAuctions, startIndex, endIndex]);
+    if (pendingAuctions) {
+      setTotalAuctions(pendingAuctions?.length);
+      setAuctions(pendingAuctions?.slice(startIndex, endIndex));
+      setResponse(pendingAuctions);
+    }
+    if (search.length > 0) handleSearch();
+  }, [pendingAuctions, startIndex, endIndex, search]);
   const handleView = async (auctionId) => {
     try {
       const config = {
@@ -96,6 +109,20 @@ const AdminApproveAuctions = () => {
       });
     }
   };
+  const handleSearch = () => {
+    let searchedAucions = [];
+    if (search.length > 0) {
+      searchedAucions = response?.filter((item) => {
+        return item?.auctionId?.item
+          ?.toLowerCase()
+          .includes(search.toLowerCase());
+      });
+    } else {
+      searchedAucions = response;
+    }
+    setTotalAuctions(searchedAucions.length);
+    setAuctions(searchedAucions.slice(startIndex, endIndex));
+  };
   return (
     <>
       <Box p={2}>
@@ -109,6 +136,43 @@ const AdminApproveAuctions = () => {
           ]}
         />
       </Box>
+      <Flex>
+        <InputGroup>
+          <InputLeftElement
+            pointerEvents="none"
+            children={<Search2Icon color="gray.600" />}
+          />
+          <Input
+            w={{ md: "xl", base: "lg" }}
+            type="text"
+            placeholder="Search for auction items"
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            value={search}
+          />
+          <InputRightAddon p={0} border="none">
+            <Button
+              borderLeftRadius={0}
+              borderRightRadius={3.3}
+              onClick={() => {
+                handleSearch();
+              }}
+            >
+              search
+            </Button>
+            <Button
+              borderLeftRadius={0}
+              borderRightRadius={3.3}
+              onClick={() => {
+                setSearch("");
+              }}
+            >
+              <RepeatIcon />
+            </Button>
+          </InputRightAddon>
+        </InputGroup>
+      </Flex>
       {auctions ? (
         <TableContainer>
           <Table>

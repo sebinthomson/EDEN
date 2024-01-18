@@ -346,6 +346,23 @@ const review = asyncHandler(async (req, res) => {
   }
 });
 
+const allAuctionsSalesReport = asyncHandler(async (req, res) => {
+  try {
+    const englishAuctions = await EnglishAuction.find({
+      winningBid: { $ne: -1 },
+    }).populate("user");
+    const reverseAuctions = await ReverseAuction.find({
+      winningBid: { $ne: -1 },
+    }).populate("user");
+
+    res.json({
+      allAuctions: { englishAuctions, reverseAuctions },
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
+});
+
 export {
   newEnglishAuctionUser,
   newReverseAuctionUser,
@@ -362,4 +379,5 @@ export {
   approveAuctionsQuery,
   approveAuction,
   review,
+  allAuctionsSalesReport,
 };
