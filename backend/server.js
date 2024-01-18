@@ -70,7 +70,6 @@ const io = new ServerIoSocket(server, {
   cors: {
     // origin: "http://localhost:3000",
     origin: "https://eden-kerala.online/",
-    // credentials: true,
   },
 });
 
