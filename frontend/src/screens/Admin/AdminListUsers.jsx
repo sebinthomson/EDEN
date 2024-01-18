@@ -1,3 +1,4 @@
+/* eslint-disable react/no-children-prop */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import {
@@ -25,11 +26,19 @@ import {
   DrawerCloseButton,
   Text,
   VStack,
+  Button,
+  InputRightAddon,
+  Input,
+  InputLeftElement,
+  InputGroup,
+  Flex,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
   InfoOutlineIcon,
   NotAllowedIcon,
+  RepeatIcon,
+  Search2Icon,
 } from "@chakra-ui/icons";
 import BreadCrumbs from "../../components/Admin/BreadCrumbs";
 import { useState, useRef, useEffect } from "react";
@@ -41,6 +50,8 @@ import Pagination from "../../components/Admin/Pagination";
 import moment from "moment";
 
 const AdminListUsers = () => {
+  const [response, setResponse] = useState([]);
+  const [search, setSearch] = useState("");
   const [totalUsers, setTotalUsers] = useState();
   const [userDetail, setUserDetail] = useState();
   const [startIndex, setStartIndex] = useState();
@@ -52,9 +63,11 @@ const AdminListUsers = () => {
   useEffect(() => {
     if (users) {
       setTotalUsers(users.length);
+      setResponse(users);
       setUsersDetails(users.slice(startIndex, endIndex));
     }
-  }, [startIndex, endIndex, users, setUsersDetails]);
+    if (search.length > 0) handleSearch();
+  }, [startIndex, endIndex, users, search]);
   const [blockUnblockUserApiCall] = useBlockUnblockUserMutation();
   const toast = useToast();
   const userAction = async ({ block, userId }) => {
@@ -76,6 +89,18 @@ const AdminListUsers = () => {
       });
     }
   };
+  const handleSearch = () => {
+    let searchedUsers = [];
+    if (search.length > 0) {
+      searchedUsers = response?.filter((item) => {
+        return item?.name?.toLowerCase().includes(search.toLowerCase());
+      });
+    } else {
+      searchedUsers = response;
+    }
+    setTotalUsers(searchedUsers.length);
+    setUsersDetails(searchedUsers.slice(startIndex, endIndex));
+  };
   return (
     <>
       <Box p={2}>
@@ -86,6 +111,43 @@ const AdminListUsers = () => {
           ]}
         />
       </Box>
+      <Flex>
+        <InputGroup>
+          <InputLeftElement
+            pointerEvents="none"
+            children={<Search2Icon color="gray.600" />}
+          />
+          <Input
+            w={{ md: "xl", base: "lg" }}
+            type="text"
+            placeholder="Search for users"
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            value={search}
+          />
+          <InputRightAddon p={0} border="none">
+            <Button
+              borderLeftRadius={0}
+              borderRightRadius={3.3}
+              onClick={() => {
+                handleSearch();
+              }}
+            >
+              search
+            </Button>
+            <Button
+              borderLeftRadius={0}
+              borderRightRadius={3.3}
+              onClick={() => {
+                setSearch("");
+              }}
+            >
+              <RepeatIcon />
+            </Button>
+          </InputRightAddon>
+        </InputGroup>
+      </Flex>
       {usersDetails ? (
         <TableContainer>
           <Table>

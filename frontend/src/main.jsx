@@ -35,6 +35,7 @@ import SellerProfile from "./screens/User/SellerProfile.jsx";
 import AdminDashboard from "./screens/Admin/AdminDashboard.jsx";
 import ErrorPage from "./screens/ErrorPage.jsx";
 import UserWatchlist from "./screens/User/UserWatchlist.jsx";
+import AdminSalesReport from "./screens/Admin/AdminSalesReport.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -68,16 +69,14 @@ const router = createBrowserRouter(
             path="/userAuctioning/createReverseAuction"
             element={<ReverseAuctionCreateForm />}
           />
-          <Route
-            path="/userWatchlist"
-            element={<UserWatchlist/>}
-          />
+          <Route path="/userWatchlist" element={<UserWatchlist />} />
         </Route>
       </Route>
 
       <Route path="/admin/adminLogin" element={<AdminLogin />} />
       <Route path="" element={<PrivateRouteAdmin />}>
         <Route path="/admin/" element={<AdminDashboard />} />
+        <Route path="/admin/adminSalesReport" element={<AdminSalesReport />} />
         <Route path="/admin/listUsers" element={<AdminListUsers />} />
         <Route
           path="/admin/listAuctioneers"

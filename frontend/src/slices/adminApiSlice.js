@@ -60,6 +60,12 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    allAuctionsSalesReport: builder.query({
+      query: () => ({
+        url: `${ADMIN_URL}/allAuctionsSalesReport`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -73,4 +79,5 @@ export const {
   useApproveAuctionsQuery,
   useApproveAuctionMutation,
   useAdminDashboardQuery,
+  useAllAuctionsSalesReportQuery,
 } = userAdminApiSlice;

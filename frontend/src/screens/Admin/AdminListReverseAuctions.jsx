@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react/no-children-prop */
 /* eslint-disable no-unused-vars */
 import {
   Table,
@@ -24,8 +26,19 @@ import {
   DrawerCloseButton,
   Text,
   VStack,
+  Button,
+  InputRightAddon,
+  Input,
+  InputLeftElement,
+  InputGroup,
+  Flex,
 } from "@chakra-ui/react";
-import { HamburgerIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import {
+  HamburgerIcon,
+  InfoOutlineIcon,
+  RepeatIcon,
+  Search2Icon,
+} from "@chakra-ui/icons";
 import Pagination from "../../components/Admin/Pagination";
 import BreadCrumbs from "../../components/Admin/BreadCrumbs";
 import { useState, useEffect, useRef } from "react";
@@ -33,6 +46,8 @@ import { useListReverseAuctionsAdminQuery } from "../../slices/adminApiSlice";
 import moment from "moment";
 
 const AdminListEnglishAuctions = () => {
+  const [response, setResponse] = useState([]);
+  const [search, setSearch] = useState("");
   const [startIndex, setStartIndex] = useState();
   const [endIndex, setEndIndex] = useState();
   const [auctions, setAuctions] = useState();
@@ -41,27 +56,77 @@ const AdminListEnglishAuctions = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef(null);
   const toast = useToast();
-  const {
-    data: allAuctions,
-    error,
-    refetch,
-  } = useListReverseAuctionsAdminQuery();
+  const { data: allAuctions } = useListReverseAuctionsAdminQuery();
   useEffect(() => {
     if (allAuctions) {
       setTotalAuctions(allAuctions.length);
       setAuctions(allAuctions.slice(startIndex, endIndex));
+      setResponse(allAuctions);
     }
-  }, [startIndex, endIndex, allAuctions, auctions]);
+    if (search.length > 0) handleSearch();
+  }, [startIndex, endIndex, allAuctions, auctions, search]);
+  const handleSearch = () => {
+    let searchedAucions = [];
+    if (search.length > 0) {
+      searchedAucions = response?.filter((item) => {
+        return item?.item?.toLowerCase().includes(search.toLowerCase());
+      });
+    } else {
+      searchedAucions = response;
+    }
+    setTotalAuctions(searchedAucions.length);
+    setAuctions(searchedAucions.slice(startIndex, endIndex));
+  };
   return (
     <>
       <Box p={2}>
         <BreadCrumbs
           allPage={[
             { Name: "Admin Panel", Link: "/admin" },
-            { Name: "List Reverse Auctions", Link: "/admin/listReverseAuctions" },
+            {
+              Name: "List Reverse Auctions",
+              Link: "/admin/listReverseAuctions",
+            },
           ]}
         />
       </Box>
+      <Flex>
+        <InputGroup>
+          <InputLeftElement
+            pointerEvents="none"
+            children={<Search2Icon color="gray.600" />}
+          />
+          <Input
+            w={{ md: "xl", base: "lg" }}
+            type="text"
+            placeholder="Search for auction items"
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            value={search}
+          />
+          <InputRightAddon p={0} border="none">
+            <Button
+              borderLeftRadius={0}
+              borderRightRadius={3.3}
+              onClick={() => {
+                handleSearch();
+              }}
+            >
+              search
+            </Button>
+            <Button
+              borderLeftRadius={0}
+              borderRightRadius={3.3}
+              onClick={() => {
+                setSearch("");
+              }}
+            >
+              <RepeatIcon />
+            </Button>
+          </InputRightAddon>
+        </InputGroup>
+      </Flex>
       {auctions ? (
         <TableContainer>
           <Table>

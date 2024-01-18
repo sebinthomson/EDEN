@@ -13,6 +13,7 @@ import { FiArrowRight } from "react-icons/fi";
 import { useNewEnglishAuctionUserMutation } from "../../slices/userApiSlice.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { differenceInSeconds } from "date-fns";
 const EnglishAuctionCreateForm = () => {
   const [item, setItem] = useState();
   const [quantity, setQuantity] = useState();
@@ -43,11 +44,7 @@ const EnglishAuctionCreateForm = () => {
       endDate &&
       images.length > 0
     ) {
-      console.log(new Date(endDate), new Date(startDate));
-      if (
-        Number(Date(endDate)) - Number(Date(startDate)) >=
-        24 * 60 * 60 * 1000
-      ) {
+      if (differenceInSeconds(endDate, startDate) >= 24 * 60 * 60) {
         try {
           const formData = new FormData();
           formData.append("user", userInfo._id);
@@ -125,6 +122,7 @@ const EnglishAuctionCreateForm = () => {
               <Box width={{ md: "47%" }}>
                 <FormLabel fontWeight={"700"}>Bidding Start Date</FormLabel>
                 <Input
+                  min={new Date().toISOString().slice(0, 16)}
                   type="datetime-local"
                   bgColor={"#8080802e"}
                   onChange={(e) => setStartDate(e.target.value)}

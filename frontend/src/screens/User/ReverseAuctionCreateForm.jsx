@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useNewReverseAuctionUserMutation } from "../../slices/userApiSlice";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { differenceInSeconds } from "date-fns";
 
 const ReverseAuctionCreateForm = () => {
   const [item, setItem] = useState();
@@ -29,21 +30,31 @@ const ReverseAuctionCreateForm = () => {
         isClosable: true,
       });
     } else {
-      try {
-        const res = await newReverseAuctionApiCall({
-          userId: userInfo._id,
-          item,
-          quantity,
-          startDate,
-          endDate,
-        }).unwrap();
-        navigate("/userReverseAuctions/details", {
-          state: { data: res.newReverseAuction },
-        });
-      } catch (err) {
-        console.log(err);
+      if (differenceInSeconds(endDate, startDate) >= 24 * 60 * 60) {
+        try {
+          const res = await newReverseAuctionApiCall({
+            userId: userInfo._id,
+            item,
+            quantity,
+            startDate,
+            endDate,
+          }).unwrap();
+          navigate("/userReverseAuctions/details", {
+            state: { data: res.newReverseAuction },
+          });
+        } catch (err) {
+          console.log(err);
+          toast({
+            title: `${err?.data?.message || err.error}`,
+            status: `error`,
+            duration: 9000,
+            isClosable: true,
+          });
+        }
+      } else {
         toast({
-          title: `${err?.data?.message || err.error}`,
+          title:
+            "There should be a minimum gap of 24 hours between the start date and end date",
           status: `error`,
           duration: 9000,
           isClosable: true,
