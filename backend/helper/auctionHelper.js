@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
-import EnglishAuction from "../models/EnglishAuctionModel.js";
-import ReverseAuction from "../models/ReverseAuctionModel.js";
+import EnglishAuction from "../models/englishAuctionModel.js";
+import ReverseAuction from "../models/reverseAuctionModel.js";
 import Biddings from "../models/biddingsModel.js";
 import Bid from "../models/bidsModel.js";
 

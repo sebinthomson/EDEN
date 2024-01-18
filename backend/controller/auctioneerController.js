@@ -4,8 +4,6 @@ import {
   auctioneerReviews,
   upsertAuctioneer,
 } from "../helper/auctioneerHelper.js";
-import EnglishAuction from "../models/EnglishAuctionModel.js";
-import ReverseAuction from "../models/ReverseAuctionModel.js";
 
 const loadAuctioneerProfile = asyncHandler(async (req, res) => {
   try {

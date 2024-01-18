@@ -2,8 +2,8 @@ import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import Auctioneer from "../models/auctioneerModel.js";
 import generateToken from "../utils/generateToken.js";
-import EnglishAuction from "../models/EnglishAuctionModel.js";
-import ReverseAuction from "../models/ReverseAuctionModel.js";
+import EnglishAuction from "../models/englishAuctionModel.js";
+import ReverseAuction from "../models/reverseAuctionModel.js";
 
 const loginAdmin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
