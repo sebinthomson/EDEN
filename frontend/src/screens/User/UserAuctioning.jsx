@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux/es/hooks/useSelector";
 
 const UserAuctioning = () => {
-  const [value, setValue] = useState("1");
+  const [value, setValue] = useState("2");
   const navigate = useNavigate();
   const toast = useToast();
   const { userInfo } = useSelector((state) => state.auth);

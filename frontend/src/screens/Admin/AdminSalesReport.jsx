@@ -5,26 +5,25 @@ import {
   HStack,
   Image,
   Input,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
   Table,
   TableContainer,
-  Tabs,
   Tbody,
   Td,
   Text,
   Th,
   Thead,
   Tr,
+  useToast,
 } from "@chakra-ui/react";
 import BreadCrumbs from "../../components/Admin/BreadCrumbs";
 import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
 import { useEffect, useState } from "react";
 import { DownloadIcon } from "@chakra-ui/icons";
 import Pagination from "../../components/Admin/Pagination";
-import { useAllAuctionsSalesReportQuery } from "../../slices/adminApiSlice";
+import {
+  useAllAuctionsSalesReportQuery,
+  useDownloadSalesReportMutation,
+} from "../../slices/adminApiSlice";
 
 const today = new Date();
 const directLinks = [
@@ -68,7 +67,9 @@ const AdminSalesReport = () => {
   const [english, setEnglish] = useState(true);
   const [startDate, setStartDate] = useState("2023-01-01");
   const [endDate, setEndDate] = useState(format(today, "yyyy-MM-dd"));
+  const [downloadSalesReportApi] = useDownloadSalesReportMutation();
   const { data: allAuctions } = useAllAuctionsSalesReportQuery();
+  const toast = useToast();
   useEffect(() => {
     if (allAuctions) {
       english
@@ -88,7 +89,30 @@ const AdminSalesReport = () => {
           setTotalAuctions(allAuctions.allAuctions.reverseAuctions.length));
     }
   }, [allAuctions, english, startIndex, endIndex]);
-  console.log(startDate, endDate);
+
+  const handleDownload = async () => {
+    try {
+      const res = await downloadSalesReportApi({
+        startDate,
+        endDate,
+        english,
+      });
+      console.log("Response:", res);
+      const url = URL.createObjectURL(res);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `report_${startDate}_${endDate}.xlsx`;
+      link.click();
+    } catch (err) {
+      toast({
+        title: `${err.message || "An error occurred"}`,
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <>
       <Box p={2}>
@@ -114,11 +138,13 @@ const AdminSalesReport = () => {
                   onChange={(e) => {
                     setStartDate(e.target.value);
                   }}
+                  value={startDate}
                 />
               </Flex>
               <Flex flexDirection={"column"}>
                 <Text fontSize={"sm"}>End Date</Text>
                 <Input
+                  value={endDate}
                   onChange={(e) => {
                     setEndDate(e.target.value);
                   }}
@@ -147,7 +173,7 @@ const AdminSalesReport = () => {
             </HStack>
           </Flex>
           <Flex ml={{ md: 96, base: 10 }}>
-            <Button>
+            <Button onClick={handleDownload}>
               <DownloadIcon />
             </Button>
           </Flex>
