@@ -22,7 +22,7 @@ import io from "socket.io-client";
 import { ChatState } from "../../context/ChatProvider.jsx";
 import { RepeatIcon } from "@chakra-ui/icons";
 const ENDPOINT = "https://eden-kerala.online/"; // "https://talk-a-tive.herokuapp.com"; -> After deployment
-// const ENDPOINT = "http://localhost:8000"; // "https://talk-a-tive.herokuapp.com"; -> After deployment
+// const ENDPOINT = "http://localhost/:8000"; // "https://talk-a-tive.herokuapp.com"; -> After deployment
 var socket, selectedChatCompare;
 
 const SingleChat = ({ AuctionId }) => {

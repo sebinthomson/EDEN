@@ -16,10 +16,17 @@ import excel from "exceljs";
 const newEnglishAuctionUser = asyncHandler(async (req, res) => {
   try {
     const { user, item, quantity, startingBid, startsOn, endsOn } = req.body;
-    const image = [];
-    for (let obj of req.files) {
-      image.push(obj.filename);
-    }
+    const image = [
+      "1705300131409.jpg",
+      "1705300132685.jpg",
+      "1705300132962.jpg",
+      "1705300133364.jpg",
+      "1705300133602.jpg",
+    ];
+    // const image = [];
+    // for (let obj of req.files) {
+    //   image.push(obj.filename);
+    // }
     const auction = await newEnglishAuction(
       user,
       item,
@@ -457,7 +464,7 @@ const downloadSalesReport = asyncHandler(async (req, res) => {
     });
 
     const xlBuffer = await workbook.xlsx.writeBuffer();
-    console.log( typeof xlBuffer);
+    console.log(typeof xlBuffer);
     res.setHeader("Content-Disposition", "attachment; filename=report.xls");
     res.setHeader(
       "Content-Type",
