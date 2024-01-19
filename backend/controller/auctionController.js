@@ -17,13 +17,6 @@ const newEnglishAuctionUser = asyncHandler(async (req, res) => {
   try {
     console.log(req.files);
     const { user, item, quantity, startingBid, startsOn, endsOn } = req.body;
-    // const image = [
-    //   "1705300131409.jpg",
-    //   "1705300132685.jpg",
-    //   "1705300132962.jpg",
-    //   "1705300133364.jpg",
-    //   "1705300133602.jpg",
-    // ];
     const image = [];
     for (let obj of req.files) {
       image.push(obj.filename);
@@ -378,40 +371,58 @@ const allAuctionsSalesReport = asyncHandler(async (req, res) => {
 
 const downloadSalesReport = asyncHandler(async (req, res) => {
   try {
-    let { startDate, endDate, english } = req.body;
+    let { startDate, endDate, english } = req.query;
     startDate = new Date(startDate);
     endDate = new Date(endDate);
     let data;
-    data = await EnglishAuction.find({
-      $and: [
-        { endsOn: { $gte: startDate } },
-        { endsOn: { $lte: endDate } },
-        { winningBid: { $ne: -1 } },
-      ],
-    }).populate("user");
-    console.log(startDate, endDate, data.length);
-    if (data.length < 1) {
-      throw new Error("No Auctions found in this date range");
-    }
-
-    let totalProfit = 500;
+    english
+      ? (data = await EnglishAuction.find({
+          $and: [
+            { endsOn: { $gte: startDate } },
+            { endsOn: { $lte: endDate } },
+            { winningBid: { $ne: -1 } },
+          ],
+        }).populate("user"))
+      : (data = await ReverseAuction.find({
+          $and: [
+            { endsOn: { $gte: startDate } },
+            { endsOn: { $lte: endDate } },
+            { winningBid: { $ne: -1 } },
+          ],
+        }).populate("user"));
+    console.log(data.length);
+    let totalProfit = data.reduce((acc, it) => acc + it.winningBid, 0);
+    totalProfit = totalProfit * 0.02;
 
     const workbook = new excel.Workbook();
     const worksheet = workbook.addWorksheet("Report");
 
-    worksheet.columns = [
-      { header: "SL. No", key: "s_no", width: 10 },
-      { header: "Item", key: "item", width: 20 },
-      { header: "Quantity", key: "quantity", width: 20 },
-      { header: "Auctioneer Name", key: "auctioneer", width: 30 },
-      { header: "Auctioneer Email", key: "auctioneeremail", width: 15 },
-      { header: "Start Date", key: "startsOn", width: 15 },
-      { header: "End Date", key: "endsOn", width: 15 },
-      { header: "Starting Bid", key: "startingBid", width: 15 },
-      { header: "Winning Bid", key: "winningBid", width: 15 },
-      { header: "", key: "", width: 20 },
-      { header: "", key: "", width: 15 },
-    ];
+    english
+      ? (worksheet.columns = [
+          { header: "SL. No", key: "s_no", width: 7 },
+          { header: "Item", key: "item", width: 20 },
+          { header: "Quantity", key: "quantity", width: 10 },
+          { header: "Auctioneer Name", key: "auctioneer", width: 30 },
+          { header: "Auctioneer Email", key: "auctioneeremail", width: 40 },
+          { header: "Start Date", key: "startsOn", width: 15 },
+          { header: "End Date", key: "endsOn", width: 15 },
+          { header: "Starting Bid", key: "startingBid", width: 12 },
+          { header: "Winning Bid", key: "winningBid", width: 12 },
+          { header: "", key: "", width: 20 },
+          { header: "", key: "", width: 15 },
+        ])
+      : (worksheet.columns = [
+          { header: "SL. No", key: "s_no", width: 7 },
+          { header: "Item", key: "item", width: 20 },
+          { header: "Quantity", key: "quantity", width: 10 },
+          { header: "Auctioneer Name", key: "auctioneer", width: 30 },
+          { header: "Auctioneer Email", key: "auctioneeremail", width: 40 },
+          { header: "Start Date", key: "startsOn", width: 15 },
+          { header: "End Date", key: "endsOn", width: 15 },
+          { header: "Winning Bid", key: "winningBid", width: 12 },
+          { header: "", key: "", width: 20 },
+          { header: "", key: "", width: 15 },
+        ]);
 
     worksheet.duplicateRow(1, 8, true);
     worksheet.getRow(1).values = ["Sales Report"];
@@ -441,14 +452,14 @@ const downloadSalesReport = asyncHandler(async (req, res) => {
     let count = 1;
     data.forEach((order) => {
       order.s_no = count;
-      order.item = order.item;
-      order.quantity = order.quantity;
-      order.auctioneer = order.user.name;
-      order.auctioneeremail = order.user.email;
-      order.startsOn = order.startsOn;
-      order.endsOn = order.endsOn;
-      order.startingBid = order.startingBid;
-      order.winningBid = order.winningBid;
+      order.item = order.item || "";
+      order.quantity = order.quantity || "";
+      order.auctioneer = order.user.name || "";
+      order.auctioneeremail = order.user.email || "";
+      order.startsOn = order.startsOn || "";
+      order.endsOn = order.endsOn || "";
+      order.startingBid = order.startingBid || "";
+      order.winningBid = order.winningBid || "";
 
       worksheet.addRow(order);
       count += 1;
@@ -465,7 +476,6 @@ const downloadSalesReport = asyncHandler(async (req, res) => {
     });
 
     const xlBuffer = await workbook.xlsx.writeBuffer();
-    console.log(typeof xlBuffer);
     res.setHeader("Content-Disposition", "attachment; filename=report.xls");
     res.setHeader(
       "Content-Type",

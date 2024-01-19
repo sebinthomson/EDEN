@@ -8,8 +8,8 @@ export default defineConfig({
     port:3000,
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
-        // target: "https://eden-kerala.online",
+        // target: "http://localhost:8000",
+        target: "https://eden-kerala.online",
         changeOrigin: true,
         secure: false,
       },

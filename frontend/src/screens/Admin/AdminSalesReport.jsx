@@ -20,10 +20,8 @@ import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
 import { useEffect, useState } from "react";
 import { DownloadIcon } from "@chakra-ui/icons";
 import Pagination from "../../components/Admin/Pagination";
-import {
-  useAllAuctionsSalesReportQuery,
-  useDownloadSalesReportMutation,
-} from "../../slices/adminApiSlice";
+import { useAllAuctionsSalesReportQuery } from "../../slices/adminApiSlice";
+import axios from "axios";
 
 const today = new Date();
 const directLinks = [
@@ -67,7 +65,6 @@ const AdminSalesReport = () => {
   const [english, setEnglish] = useState(true);
   const [startDate, setStartDate] = useState("2023-01-01");
   const [endDate, setEndDate] = useState(format(today, "yyyy-MM-dd"));
-  const [downloadSalesReportApi] = useDownloadSalesReportMutation();
   const { data: allAuctions } = useAllAuctionsSalesReportQuery();
   const toast = useToast();
   useEffect(() => {
@@ -92,13 +89,17 @@ const AdminSalesReport = () => {
 
   const handleDownload = async () => {
     try {
-      const res = await downloadSalesReportApi({
-        startDate,
-        endDate,
-        english,
-      });
-      console.log("Response:", res);
-      const url = URL.createObjectURL(res);
+      const config = {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTgzMDc2NzdhOWI2ZWFiNGJjNDg2MDIiLCJpYXQiOjE3MDU1ODYwOTUsImV4cCI6MTcwODE3ODA5NX0.1KSUcB4V1O4liHjr4oyHhmAStQrgxX3oIv2eWTIDIK8`,
+        },
+        responseType: "blob",
+      };
+      const data = await axios.get(
+        `/api/admin/downloadSalesReport?startDate=${startDate}&endDate=${endDate}&english=${english}`,
+        config
+      );
+      const url = URL.createObjectURL(data.data);
       const link = document.createElement("a");
       link.href = url;
       link.download = `report_${startDate}_${endDate}.xlsx`;
