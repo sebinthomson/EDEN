@@ -66,6 +66,13 @@ export const userAdminApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    downloadSalesReport: builder.mutation({
+      query: (data) => ({
+        url: `${ADMIN_URL}/downloadSalesReport`,
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -80,4 +87,5 @@ export const {
   useApproveAuctionMutation,
   useAdminDashboardQuery,
   useAllAuctionsSalesReportQuery,
+  useDownloadSalesReportMutation,
 } = userAdminApiSlice;

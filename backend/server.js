@@ -38,25 +38,17 @@ app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/bids", biddingRoutes);
 
-// for dist
-
 const __dirname = path.resolve();
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
   app.get("*", (req, res) =>
     res.sendFile(
       path.resolve(__dirname, "..", "frontend", "dist", "index.html")
     )
   );
 } else {
-  //? ===================== Application Home Route =====================
   app.get("/", (req, res) => res.send("server is running"));
 }
-
-// app.get("/", (req, res) => res.send("server is ready"));
-
-// ... (existing code)
 
 app.use(errorHandler);
 app.use(notFound);

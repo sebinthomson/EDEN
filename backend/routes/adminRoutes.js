@@ -14,7 +14,7 @@ import {
   listReverseAuctionsAdmin,
   approveAuctionsQuery,
   approveAuction,
-  allAuctionsSalesReport,
+  allAuctionsSalesReport,downloadSalesReport
 } from "../controller/auctionController.js";
 import { listAuctioneers } from "../controller/auctioneerController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -26,6 +26,7 @@ router.post("/loginAdmin", loginAdmin);
 router.get("/adminDashboard", adminDashboard);
 
 router.get("/allAuctionsSalesReport", allAuctionsSalesReport);
+router.post("/downloadSalesReport", downloadSalesReport);
 
 router.get("/listUsers", listUsers);
 router.post("/blockUnblockUser", blockUnblockUser);

@@ -14,6 +14,7 @@ import { useNewEnglishAuctionUserMutation } from "../../slices/userApiSlice.js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { differenceInSeconds } from "date-fns";
+
 const EnglishAuctionCreateForm = () => {
   const [item, setItem] = useState();
   const [quantity, setQuantity] = useState();
@@ -21,15 +22,29 @@ const EnglishAuctionCreateForm = () => {
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [images, setImages] = useState([]);
+  let imagesCloudinary = [];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const toast = useToast();
   const navigate = useNavigate();
   const [newEnglishAuctionApiCall] = useNewEnglishAuctionUserMutation();
   const { userInfo } = useSelector((state) => state.auth);
+
+  const setFileToBase2 = (file) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      imagesCloudinary.push(reader.result);
+      console.log("reader", reader.result);
+    };
+  };
   const handleImageChange = (e) => {
     const newImages = Array.from(e.target.files).filter(
       (file) => file.type === "image/png" || file.type === "image/jpeg"
     );
+    // Array.from(e.target.files).map((file) => {
+    //   console.log("file", file);
+    //   setFileToBase2(file);
+    // });
     setImages([...images, ...newImages]);
   };
   const handleNextImage = () => {
@@ -61,6 +76,7 @@ const EnglishAuctionCreateForm = () => {
             state: { data: res.newEnglishAuction },
           });
         } catch (err) {
+          console.log(err);
           toast({
             title: `${err?.data?.message || err.error}`,
             status: `error`,
@@ -86,7 +102,6 @@ const EnglishAuctionCreateForm = () => {
       });
     }
   };
-
   return (
     <Box display={"flex"} flexDirection={"column"}>
       <Box display={"flex"} flexDirection={{ md: "row", base: "column" }}>

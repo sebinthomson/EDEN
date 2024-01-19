@@ -9,26 +9,31 @@ import EnglishAuction from "../models/englishAuctionModel.js";
 import ReverseAuction from "../models/reverseAuctionModel.js";
 import Biddings from "../models/biddingsModel.js";
 import Bid from "../models/bidsModel.js";
-import User from "../models/userModel.js";
 import Razorpay from "razorpay";
 import nodeMailer from "nodemailer";
+import excel from "exceljs";
 
 const newEnglishAuctionUser = asyncHandler(async (req, res) => {
-  const { user, item, quantity, startingBid, startsOn, endsOn } = req.body;
-  const image = [];
-  for (let obj of req.files) {
-    image.push(obj.filename);
+  try {
+    const { user, item, quantity, startingBid, startsOn, endsOn } = req.body;
+    const image = [];
+    for (let obj of req.files) {
+      image.push(obj.filename);
+    }
+    const auction = await newEnglishAuction(
+      user,
+      item,
+      quantity,
+      startingBid,
+      startsOn,
+      endsOn,
+      image
+    );
+    res.status(200).json({ newEnglishAuction: auction });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
   }
-  const auction = await newEnglishAuction(
-    user,
-    item,
-    quantity,
-    startingBid,
-    startsOn,
-    endsOn,
-    image
-  );
-  res.status(200).json({ newEnglishAuction: auction });
 });
 
 const newReverseAuctionUser = asyncHandler(async (req, res) => {
@@ -363,6 +368,107 @@ const allAuctionsSalesReport = asyncHandler(async (req, res) => {
   }
 });
 
+const downloadSalesReport = asyncHandler(async (req, res) => {
+  try {
+    let { startDate, endDate, english } = req.body;
+    startDate = new Date(startDate);
+    endDate = new Date(endDate);
+    let data;
+    data = await EnglishAuction.find({
+      $and: [
+        { endsOn: { $gte: startDate } },
+        { endsOn: { $lte: endDate } },
+        { winningBid: { $ne: -1 } },
+      ],
+    }).populate("user");
+    console.log(startDate, endDate, data.length);
+    if (data.length < 1) {
+      throw new Error("No Auctions found in this date range");
+    }
+
+    let totalProfit = 500;
+
+    const workbook = new excel.Workbook();
+    const worksheet = workbook.addWorksheet("Report");
+
+    worksheet.columns = [
+      { header: "SL. No", key: "s_no", width: 10 },
+      { header: "Item", key: "item", width: 20 },
+      { header: "Quantity", key: "quantity", width: 20 },
+      { header: "Auctioneer Name", key: "auctioneer", width: 30 },
+      { header: "Auctioneer Email", key: "auctioneeremail", width: 15 },
+      { header: "Start Date", key: "startsOn", width: 15 },
+      { header: "End Date", key: "endsOn", width: 15 },
+      { header: "Starting Bid", key: "startingBid", width: 15 },
+      { header: "Winning Bid", key: "winningBid", width: 15 },
+      { header: "", key: "", width: 20 },
+      { header: "", key: "", width: 15 },
+    ];
+
+    worksheet.duplicateRow(1, 8, true);
+    worksheet.getRow(1).values = ["Sales Report"];
+    worksheet.getRow(1).font = { bold: true, size: 16 };
+    worksheet.getRow(1).alignment = { horizontal: "center" };
+    worksheet.mergeCells("A1:H1");
+
+    worksheet.getRow(2).values = [];
+    worksheet.getRow(3).values = [
+      "",
+      "From",
+      startDate.toISOString().split("T")[0],
+    ];
+    worksheet.getRow(3).font = { bold: false };
+    worksheet.getRow(3).alignment = { horizontal: "right" };
+    worksheet.getRow(4).values = [
+      "",
+      "To",
+      endDate.toISOString().split("T")[0],
+    ];
+    worksheet.getRow(5).values = ["", "Total Auctions", data.length];
+    worksheet.getRow(6).values = ["", "Total Profit", totalProfit];
+
+    worksheet.getRow(7).values = [];
+    worksheet.getRow(8).values = [];
+
+    let count = 1;
+    data.forEach((order) => {
+      order.s_no = count;
+      order.item = order.item;
+      order.quantity = order.quantity;
+      order.auctioneer = order.user.name;
+      order.auctioneeremail = order.user.email;
+      order.startsOn = order.startsOn;
+      order.endsOn = order.endsOn;
+      order.startingBid = order.startingBid;
+      order.winningBid = order.winningBid;
+
+      worksheet.addRow(order);
+      count += 1;
+    });
+
+    worksheet.getRow(9).eachCell((cell) => {
+      cell.font = { bold: true };
+    });
+
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+    worksheet.lastRow.eachCell((cell) => {
+      cell.font = { bold: true };
+    });
+
+    const xlBuffer = await workbook.xlsx.writeBuffer();
+    console.log( typeof xlBuffer);
+    res.setHeader("Content-Disposition", "attachment; filename=report.xls");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.send(xlBuffer);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+});
+
 export {
   newEnglishAuctionUser,
   newReverseAuctionUser,
@@ -380,4 +486,5 @@ export {
   approveAuction,
   review,
   allAuctionsSalesReport,
+  downloadSalesReport,
 };
