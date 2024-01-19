@@ -15,18 +15,19 @@ import excel from "exceljs";
 
 const newEnglishAuctionUser = asyncHandler(async (req, res) => {
   try {
+    console.log(req.files);
     const { user, item, quantity, startingBid, startsOn, endsOn } = req.body;
-    const image = [
-      "1705300131409.jpg",
-      "1705300132685.jpg",
-      "1705300132962.jpg",
-      "1705300133364.jpg",
-      "1705300133602.jpg",
-    ];
-    // const image = [];
-    // for (let obj of req.files) {
-    //   image.push(obj.filename);
-    // }
+    // const image = [
+    //   "1705300131409.jpg",
+    //   "1705300132685.jpg",
+    //   "1705300132962.jpg",
+    //   "1705300133364.jpg",
+    //   "1705300133602.jpg",
+    // ];
+    const image = [];
+    for (let obj of req.files) {
+      image.push(obj.filename);
+    }
     const auction = await newEnglishAuction(
       user,
       item,
