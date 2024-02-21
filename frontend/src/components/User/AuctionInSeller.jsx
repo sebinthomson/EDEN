@@ -42,7 +42,7 @@ const AuctionInSeller = ({ auction, profile }) => {
             m={2}
             borderRadius="full"
             boxSize={{ md: "100px", base: "75px" }}
-            src={`/Images/Auctions/${auction?.images[0]}`}
+            src={auction?.images[0]}
             alt="Profile Picture"
           />
         )}

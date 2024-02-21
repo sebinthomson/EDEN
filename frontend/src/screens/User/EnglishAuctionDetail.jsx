@@ -11,6 +11,7 @@ import {
   ListItem,
   Button,
   Icon,
+  Image,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -33,7 +34,7 @@ export default function EnglishAuctionDetail() {
   let Imagesdata = [];
   for (let i = 0; i < auction?.images.length; i++) {
     Imagesdata.push({
-      image: `/Images/Auctions/${auction?.images[i]}`,
+      image: auction?.images[i],
     });
   }
   useEffect(() => {
@@ -94,7 +95,6 @@ export default function EnglishAuctionDetail() {
           />
         )}
       </Box>
-
       <Stack spacing={{ base: 6, md: 10 }} mx={10}>
         <Box as={"header"}>
           <Heading
