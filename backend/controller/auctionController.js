@@ -12,15 +12,20 @@ import Bid from "../models/bidsModel.js";
 import Razorpay from "razorpay";
 import nodeMailer from "nodemailer";
 import excel from "exceljs";
+import cloudinary from "../config/cloudinary.js";
 
 const newEnglishAuctionUser = asyncHandler(async (req, res) => {
   try {
-    console.log(req.files);
-    const { user, item, quantity, startingBid, startsOn, endsOn } = req.body;
-    const image = [];
-    for (let obj of req.files) {
-      image.push(obj.filename);
-    }
+    const { user, item, quantity, startingBid, startsOn, endsOn, images } =
+      req.body;
+    const uploadedImages = await Promise.all(
+      images.map(async (file) => {
+        return await cloudinary.uploader.upload(file, {
+          folder: "EnglishAuctionImages",
+        });
+      })
+    );
+    const image = uploadedImages.map((image) => image.secure_url);
     const auction = await newEnglishAuction(
       user,
       item,
@@ -390,7 +395,6 @@ const downloadSalesReport = asyncHandler(async (req, res) => {
             { winningBid: { $ne: -1 } },
           ],
         }).populate("user"));
-    console.log(data.length);
     let totalProfit = data.reduce((acc, it) => acc + it.winningBid, 0);
     totalProfit = totalProfit * 0.02;
 

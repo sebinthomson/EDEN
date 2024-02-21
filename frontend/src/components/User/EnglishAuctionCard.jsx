@@ -23,6 +23,7 @@ const EnglishAuctionCard = ({ item, auctioneerPadding }) => {
   const handleAuctionDetails = () => {
     navigate("/userEnglishAuctions/details", { state: { data: item } });
   };
+  console.log(item?.images[0])
   return (
     <Center py={12}>
       <Box
@@ -56,7 +57,7 @@ const EnglishAuctionCard = ({ item, auctioneerPadding }) => {
                 pos: "absolute",
                 top: 5,
                 left: 0,
-                backgroundImage: `/Images/Auctions/${item?.images[0]}`,
+                backgroundImage: `${item?.images[0]}`,
                 filter: isHovered ? "blur(15px)" : "blur(10px)",
                 zIndex: -1,
               }}
@@ -65,7 +66,7 @@ const EnglishAuctionCard = ({ item, auctioneerPadding }) => {
                 rounded={"lg"}
                 aspectRatio={5 / 4}
                 objectFit={"cover"}
-                src={`/Images/Auctions/${item?.images[0]}`}
+                src={item?.images[0]}
                 alt="#"
               />
             </Box>

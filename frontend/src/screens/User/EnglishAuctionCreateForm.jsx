@@ -7,8 +7,9 @@ import {
   Button,
   Flex,
   useToast,
+  Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FiArrowRight } from "react-icons/fi";
 import { useNewEnglishAuctionUserMutation } from "../../slices/userApiSlice.js";
 import { useSelector } from "react-redux";
@@ -22,31 +23,51 @@ const EnglishAuctionCreateForm = () => {
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [images, setImages] = useState([]);
-  let imagesCloudinary = [];
+  const [imagesData, setImagesData] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const toast = useToast();
   const navigate = useNavigate();
   const [newEnglishAuctionApiCall] = useNewEnglishAuctionUserMutation();
   const { userInfo } = useSelector((state) => state.auth);
+  const hiddenFileInput = useRef(null);
 
-  const setFileToBase2 = (file) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      imagesCloudinary.push(reader.result);
-      console.log("reader", reader.result);
-    };
-  };
   const handleImageChange = (e) => {
-    const newImages = Array.from(e.target.files).filter(
-      (file) => file.type === "image/png" || file.type === "image/jpeg"
-    );
-    // Array.from(e.target.files).map((file) => {
-    //   console.log("file", file);
-    //   setFileToBase2(file);
-    // });
-    setImages([...images, ...newImages]);
+    const files = Array.from(e.target.files);
+    Promise.allSettled(
+      files.map((file) => {
+        return new Promise((resolve, reject) => {
+          if (file?.size >= 102400) {
+            reject("Please upload an image less than 100kb in size");
+          } else if (
+            !(file.type === "image/png" || file.type === "image/jpeg")
+          ) {
+            reject("Please upload an image of png or jpeg type");
+          } else {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+              setImages([...images, file]);
+              setImagesData([...imagesData, reader.result]);
+              resolve(reader.result);
+            };
+          }
+        });
+      })
+    ).then((results) => {
+      results.filter((result) => {
+        if (result.status === "rejected") {
+          console.log("hell");
+          toast({
+            title: `${result.reason}`,
+            status: `error`,
+            duration: 2000,
+            isClosable: true,
+          });
+        }
+      });
+    });
   };
+
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
@@ -57,21 +78,25 @@ const EnglishAuctionCreateForm = () => {
       startingBid &&
       startDate &&
       endDate &&
-      images.length > 0
+      imagesData.length > 0
     ) {
       if (differenceInSeconds(endDate, startDate) >= 24 * 60 * 60) {
         try {
-          const formData = new FormData();
-          formData.append("user", userInfo._id);
-          formData.append("item", item);
-          formData.append("quantity", quantity);
-          formData.append("startingBid", startingBid);
-          formData.append("startsOn", startDate);
-          formData.append("endsOn", endDate);
-          for (let obj of images) {
-            formData.append("images", obj);
-          }
-          const res = await newEnglishAuctionApiCall(formData).unwrap();
+          toast({
+            title: "Please wait",
+            status: `loading`,
+            duration: 3000,
+            isClosable: true,
+          });
+          const res = await newEnglishAuctionApiCall({
+            user: userInfo._id,
+            item: item,
+            quantity: quantity,
+            startingBid: startingBid,
+            startsOn: startDate,
+            endsOn: endDate,
+            images: imagesData,
+          }).unwrap();
           navigate("/userEnglishAuctions/details", {
             state: { data: res.newEnglishAuction },
           });
@@ -102,6 +127,7 @@ const EnglishAuctionCreateForm = () => {
       });
     }
   };
+
   return (
     <Box display={"flex"} flexDirection={"column"}>
       <Box display={"flex"} flexDirection={{ md: "row", base: "column" }}>
@@ -160,14 +186,24 @@ const EnglishAuctionCreateForm = () => {
           ml={"0"}
           width={{ md: "md" }}
         >
-          <FormLabel fontWeight={"700"}>Images</FormLabel>
+          <FormLabel fontWeight={"700"} display={"flex"}>
+            Images
+          </FormLabel>
+          <Button
+            size={"sm"}
+            onClick={() => {
+              hiddenFileInput.current.click();
+            }}
+          >
+            Upload Images
+          </Button>
           <Input
+            ref={hiddenFileInput}
             type="file"
-            display={"flex"}
+            display={"none"}
             border={"none"}
             ml={{ md: "-4" }}
             onChange={handleImageChange}
-            multiple
             accept=".png, .jpeg, .jpg"
           />
           <Flex

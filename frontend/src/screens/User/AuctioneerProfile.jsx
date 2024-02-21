@@ -58,40 +58,71 @@ const AuctioneerProfile = () => {
   const handleClick = () => {
     hiddenFileInput.current.click();
   };
+  const handleProfileImage = (e) => {
+    const file = e.target.files[0];
+    if (file?.size >= 102400) {
+      toast({
+        title: "Please upload an image less than 100kb in size",
+        status: `error`,
+        duration: 4000,
+        isClosable: true,
+      });
+    } else {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+    }
+  };
   const handleprofile = async () => {
-    if (!profile && mobileNumber == "Complete your profile setup") {
+    try {
+      if (!profile && mobileNumber == "Complete your profile setup") {
+        toast({
+          title: "Please fill in your Mobile Number",
+          status: `error`,
+          duration: 4000,
+          isClosable: true,
+        });
+      } else if (!profile && location == "Complete your profile setup") {
+        toast({
+          title: "Please fill in your Location",
+          status: `error`,
+          duration: 4000,
+          isClosable: true,
+        });
+      } else if (!profile && !profileImage) {
+        toast({
+          title: "Please upload your photo",
+          status: `error`,
+          duration: 4000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Please wait",
+          status: `loading`,
+          duration: 4000,
+          isClosable: true,
+        });
+        const res = await profileUpdateApiCall({
+          id: userInfo._id,
+          mobileNumber: mobileNumber,
+          location: location,
+          image: profileImage,
+        }).unwrap();
+        dispatch(setCredentials({ ...res[0].user }));
+        onClose();
+        refetch();
+      }
+    } catch (error) {
       toast({
-        title: "Please fill in your Mobile Number",
+        title: "Error Uploading Profile Details, Please try again",
         status: `error`,
         duration: 4000,
         isClosable: true,
       });
     }
-    if (!profile && location == "Complete your profile setup") {
-      toast({
-        title: "Please fill in your Location",
-        status: `error`,
-        duration: 4000,
-        isClosable: true,
-      });
-    }
-    if (!profile && !profileImage) {
-      toast({
-        title: "Please upload your photo",
-        status: `error`,
-        duration: 4000,
-        isClosable: true,
-      });
-    }
-    const formData = new FormData();
-    formData.append("id", userInfo._id);
-    formData.append("mobileNumber", mobileNumber);
-    formData.append("location", location);
-    formData.append("image", profileImage);
-    const res = await profileUpdateApiCall(formData).unwrap();
-    dispatch(setCredentials({ ...res[0].user }));
-    onClose();
-    refetch();
   };
   return (
     <Box>
@@ -136,10 +167,7 @@ const AuctioneerProfile = () => {
                 </Button>
                 <Input
                   type="file"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    setProfileImage(file);
-                  }}
+                  onChange={handleProfileImage}
                   ref={hiddenFileInput}
                   style={{ display: "none" }}
                   name="image"
@@ -179,11 +207,7 @@ const AuctioneerProfile = () => {
             <Image
               borderRadius="full"
               boxSize={{ md: "200px", base: "175px" }}
-              src={
-                profile
-                  ? `/Images/Auctioneer/ProfileImage/${profile[0]?.profileImage}`
-                  : "/Images/default.png"
-              }
+              src={profile ? profile[0].profileImage : "/Images/default.png"}
               alt="Profile Picture"
             />
             <Text color={"gray"} fontWeight={"700"}>

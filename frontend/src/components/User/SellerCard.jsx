@@ -35,7 +35,7 @@ const SellerCard = ({ auctioneer }) => {
             m={2}
             borderRadius="full"
             boxSize={{ md: "100px", base: "75px" }}
-            src={`/Images/Auctioneer/ProfileImage/${auctioneer?.profileImage}`}
+            src={`${auctioneer?.profileImage}`}
             alt="Profile Picture"
           />
           <Text color={"black"} fontWeight={"700"}>

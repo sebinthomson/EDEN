@@ -73,7 +73,7 @@ const SellerProfile = () => {
               boxSize={{ md: "200px", base: "175px" }}
               src={
                 profile
-                  ? `/Images/Auctioneer/ProfileImage/${profile?.profileImage}`
+                  ? `${profile?.profileImage}`
                   : "/Images/default.png"
               }
               alt="Profile Picture"

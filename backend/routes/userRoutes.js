@@ -36,19 +36,11 @@ router.post("/confirmForgotPasswordOTP", confirmForgotPasswordOTP);
 router.put("/changePasswordUser", changePasswordUser);
 router.post("/oAuthLoginUser", oAuthLoginUser);
 router.post("/logoutUser", logoutUser);
-router.post(
-  "/newEnglishAuctionUser",
-  englishAuctionUpload.array("images", 5),
-  newEnglishAuctionUser
-);
+router.post("/newEnglishAuctionUser", newEnglishAuctionUser);
 router.post("/newReverseAuctionUser", newReverseAuctionUser);
 router.get("/listAuctionUser", listAuctionUser);
 router.get("/loadAuctioneerProfile", loadAuctioneerProfile);
-router.post(
-  "/profileUpdate",
-  profileUpdateUpload.single("image"),
-  profileUpdate
-);
+router.post("/profileUpdate", profileUpdate);
 router.post("/razorpay", razorpay);
 router.post("/razorpayvalidate", razorpayvalidate);
 router.post("/filterAuctions", filterAuctions);

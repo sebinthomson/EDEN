@@ -29,8 +29,8 @@ app.use(
 
 app.use(morgan("dev"));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "30mb", extended: true }));
+app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 app.use(cookieParser());
 
@@ -41,10 +41,7 @@ app.use("/api/bids", biddingRoutes);
 const __dirname = path.resolve();
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
-  app.use(
-    "/Images",
-    express.static(path.join(__dirname, "/public/Images"))
-  );
+  app.use("/Images", express.static(path.join(__dirname, "/public/Images")));
   app.get("*", (req, res) =>
     res.sendFile(
       path.resolve(__dirname, "..", "frontend", "dist", "index.html")
@@ -64,8 +61,7 @@ const server = app.listen(port, () =>
 const io = new ServerIoSocket(server, {
   pingTimeout: 60000,
   cors: {
-    // origin: "http://localhost:3000",
-    origin: "https://eden-kerala.online/",
+    origin: process.env.ORIGIN,
   },
 });
 

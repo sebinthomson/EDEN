@@ -4,6 +4,7 @@ import {
   auctioneerReviews,
   upsertAuctioneer,
 } from "../helper/auctioneerHelper.js";
+import cloudinary from "../config/cloudinary.js";
 
 const loadAuctioneerProfile = asyncHandler(async (req, res) => {
   try {
@@ -27,18 +28,23 @@ const loadAuctioneerProfile = asyncHandler(async (req, res) => {
 });
 
 const profileUpdate = asyncHandler(async (req, res) => {
-  const { id, mobileNumber, location } = req.body;
-  let filename;
-  if (req.file) {
-    filename = req.file.filename;
+  try {
+    const { id, mobileNumber, location, image } = req.body;
+    const result = await cloudinary.uploader.upload(image, {
+      folder: "AuctioneerProfilePic",
+    });
+    let filename = result.secure_url;
+    const auctioneer = await upsertAuctioneer(
+      id,
+      mobileNumber,
+      location,
+      filename
+    );
+    res.status(200).json(auctioneer);
+  } catch (error) {
+    console.log(error.message);
+    throw new Error("Error updating auctioneer profile");
   }
-  const auctioneer = await upsertAuctioneer(
-    id,
-    mobileNumber,
-    location,
-    filename
-  );
-  res.status(200).json(auctioneer);
 });
 
 const listAuctioneers = asyncHandler(async (req, res) => {
