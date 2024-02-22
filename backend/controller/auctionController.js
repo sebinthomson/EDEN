@@ -241,11 +241,12 @@ const approveAuctionsQuery = asyncHandler(async (req, res) => {
     const currentDate = new Date();
     biddings = biddings.filter((element) => {
       let endsOnDate;
-      if (element.auctionId.endsOn) {
+      if (element?.auctionId?.endsOn) {
         endsOnDate = new Date(element?.auctionId?.endsOn);
       }
-      return element.auctionId.winningBid == -1 && endsOnDate < currentDate;
+      return element?.auctionId?.winningBid == -1 && endsOnDate < currentDate;
     });
+    console.log(biddings);
     res.status(200).json(biddings);
   } catch (error) {
     console.log(error.message);
